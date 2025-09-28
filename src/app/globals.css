@@ -1,0 +1,156 @@
+/* Updated: 2025-09-27T20:03:03.227Z */
+/* Updated: 2025-09-27T15:10:55.565Z */
+/* Updated: 2025-09-27T14:47:28.154Z */
+/* Updated: 2025-09-27T14:31:19.615Z */
+/* Updated: 2025-09-26T21:33:30.268Z */
+/* Updated: 2025-09-25T22:17:03.857Z */
+/* Updated: 2025-09-25T21:56:20.018Z */
+/* Updated: 2025-09-25T16:55:53.665Z */
+/* Updated: 2025-09-25T16:27:50.054Z */
+/* Updated: 2025-09-25T15:34:44.876Z */
+/* Updated: 2025-09-25T14:26:42.054Z */
+/* Updated: 2025-09-25T13:51:18.535Z */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  /* GoBio Tokens */
+  --gb-primary: #32AA93;
+  --gb-secondary: #7CBF81;
+  --gb-neutral-100: #CAD2DD; /* UI/contornos */
+  --gb-neutral-800: #363636; /* texto principal */
+  --gb-neutral-600: #667387; /* titulares/ítems */
+  --gb-border-soft: #E6EBF2; /* bordes cards/cart */
+  --gb-bg-soft: #FAFAFA; /* fondo carrito */
+  --gb-gradient: linear-gradient(135deg, #32AA93 0%, #7CBF81 100%);
+
+  /* Base theme mapped to GoBio */
+  --radius: 0.875rem; /* 14px aprox, radios 12–16 */
+  --background: #ffffff;
+  --foreground: var(--gb-neutral-800);
+  --card: #ffffff;
+  --card-foreground: var(--gb-neutral-800);
+  --popover: #ffffff;
+  --popover-foreground: var(--gb-neutral-800);
+  --primary: var(--gb-primary);
+  --primary-foreground: #ffffff;
+  --secondary: #f6f9fb; /* suave para fondos secundarios */
+  --secondary-foreground: var(--gb-neutral-800);
+  --muted: #f6f8fb;
+  --muted-foreground: var(--gb-neutral-600);
+  --accent: rgba(50,170,147,0.08);
+  --accent-foreground: var(--gb-primary);
+  --destructive: #E46E6E;
+  --border: var(--gb-border-soft);
+  --input: var(--gb-neutral-100);
+  --ring: rgba(50,170,147,0.4);
+
+  /* Optional charts keep defaults */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--gb-neutral-800);
+  --sidebar-primary: var(--gb-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(50,170,147,0.08);
+  --sidebar-accent-foreground: var(--gb-primary);
+  --sidebar-border: var(--gb-neutral-100);
+  --sidebar-ring: rgba(50,170,147,0.4);
+
+  /* Typography */
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+.dark {
+  --background: #111111;
+  --foreground: #f5f5f5;
+  --card: #171717;
+  --card-foreground: #f5f5f5;
+  --popover: #171717;
+  --popover-foreground: #f5f5f5;
+  --primary: var(--gb-primary);
+  --primary-foreground: #ffffff;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #f5f5f5;
+  --muted: #1a1a1a;
+  --muted-foreground: #b0b8c6;
+  --accent: rgba(50,170,147,0.12);
+  --accent-foreground: var(--gb-primary);
+  --destructive: #F08B8B;
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: rgba(50,170,147,0.5);
+
+  --sidebar: #161616;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: var(--gb-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(50,170,147,0.12);
+  --sidebar-accent-foreground: var(--gb-primary);
+  --sidebar-border: #2a2a2a;
+  --sidebar-ring: rgba(50,170,147,0.5);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    font-family: var(--font-sans);
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Hide Next.js error overlay portal */
+nextjs-portal {
+  display: none !important;
+}
