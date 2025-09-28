@@ -8,3 +8,5 @@ deploy/
 .env*.local
 .DS_Store
 Thumbs.db
+
+deploy.zip
