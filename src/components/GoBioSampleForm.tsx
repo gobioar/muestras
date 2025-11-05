@@ -47,15 +47,17 @@ type CatalogItem = {
   category: Category;
 };
 
-// Miniatura con fallback: busca cover/1 en webp/jpg/png y si falla usa placeholder
+// Miniatura con fallback y prioridad opcional
 function ProductThumb({
   id,
   alt,
   className = "",
+  priority = false,
 }: {
   id: string;
   alt: string;
   className?: string;
+  priority?: boolean;
 }) {
   const candidates = [
     `/images/products/${id}/cover.webp`,
@@ -72,13 +74,16 @@ function ProductThumb({
       : "/images/products/placeholder.svg";
   return (
     <img
+      key={src} // fuerza remount al cambiar src
       src={src}
       alt={alt}
       onError={() => setSrcIdx((i) => (i < candidates.length ? i + 1 : i))}
       className={`${className} object-cover rounded-lg border border-[color:var(--gb-border-soft)] bg-[color:var(--gb-bg-soft)]`}
       width={56}
       height={56}
-      loading="lazy"
+      loading={priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : "auto"}
+      decoding="async"
     />
   );
 }
@@ -88,12 +93,13 @@ const CATALOG: CatalogItem[] = [
   { id: "acc-portavaso-doble-universal", name: "Portavaso Doble Universal", category: "Accesorios" },
   { id: "acc-portavaso-doble-valija-carry-trade", name: "Portavaso Doble Valija (Carry Tray)", category: "Accesorios" },
   { id: "acc-collarin-multi-medida", name: "Collarín Multi Medida", category: "Accesorios" },
-  { id: "acc-sorbete-23cm-9mm", name: "Sorbete 23cm (ø9mm)", category: "Accesorios" },
+  { id: "acc-sorbete-n-23cm-9mm", name: "Sorbete 23cm (ø9mm) Natural", category: "Accesorios" },
+  { id: "acc-sorbete-b-23cm-9mm", name: "Sorbete 23cm (ø9mm) Blanco", category: "Accesorios" },
   { id: "acc-revolvedor-madera-15cm", name: "Revolvedor 15cm", category: "Accesorios" },
 
   // Bandejas
-  { id: "ban-790", name: "Bandeja 790", category: "Bandejas" },
-  { id: "ban-tapa-790", name: "Tapa Bandeja 790", category: "Bandejas" },
+  { id: "ban-850", name: "Bandeja 850", category: "Bandejas" },
+  { id: "ban-tapa-850", name: "Tapa Bandeja 850", category: "Bandejas" },
   { id: "ban-n1-12x9", name: "Bandeja N1 12x9cm", category: "Bandejas" },
   { id: "ban-n2-16x13", name: "Bandeja N2 16x13cm", category: "Bandejas" },
   { id: "ban-n3-18x14", name: "Bandeja N3 18x14cm", category: "Bandejas" },
@@ -114,9 +120,16 @@ const CATALOG: CatalogItem[] = [
   { id: "bow-tapa-850", name: "Tapa Bowl 850", category: "Bowls" },
   { id: "bow-500", name: "Bowl 500", category: "Bowls" },
   { id: "bow-tapa-500", name: "Tapa Bowl 500", category: "Bowls" },
+  { id: "bow-250", name: "Bowl 250", category: "Bowls" },
+  { id: "bow-tapa-250", name: "Tapa Bowl 250", category: "Bowls" },
   { id: "bow-dip-2oz", name: "Dip 2oz", category: "Bowls" },
   { id: "bow-tapa-dip-2oz", name: "Tapa Dip 2oz", category: "Bowls" },
-  { id: "bow-caja-wok-360-12oz-kraft", name: "Caja para Wok (360 cm3 - 12 Oz)", category: "Bowls" },
+  { id: "bow-1000-fibra", name: "Bowl 1000", category: "Bowls" },
+  { id: "bow-tapa-1000-fibra", name: "Tapa Bowl 1000", category: "Bowls" },
+  { id: "bow-500-fibra", name: "Bowl 500", category: "Bowls" },
+  { id: "bow-tapa-500-fibra", name: "Tapa Bowl 500", category: "Bowls" },
+  { id: "bow-caja-wok-c-360-12oz-kraft", name: "Caja para Wok Cuadrada (360 cm3 - 12 Oz)", category: "Bowls" },
+  { id: "bow-caja-wok-r-360-12oz-kraft", name: "Caja para Wok Rectangular (360 cm3 - 12 Oz)", category: "Bowls" },
   { id: "bow-caja-wok-730-24oz-kraft", name: "Caja para Wok (730 cm3 - 24 Oz)", category: "Bowls" },
   { id: "bow-caja-wok-750-25oz-kraft", name: "Caja para Wok (750 cm3 - 25 Oz)", category: "Bowls" },
   { id: "bow-caja-wok-1450-49oz-kraft", name: "Caja para Wok (1450 cm3 - 49 Oz)", category: "Bowls" },
@@ -156,6 +169,7 @@ const CATALOG: CatalogItem[] = [
   { id: "vaso-12oz", name: "Vaso 12oz (355ml)", category: "Vasos" },
   { id: "tapa-vaso-12oz", name: "Tapa Vaso 12oz", category: "Vasos" },
   { id: "vaso-14oz", name: "Vaso 14oz (415ml)", category: "Vasos" },
+  { id: "tapa-vaso-14oz", name: "Tapa Vaso 14oz", category: "Vasos" },
 ];
 
 // Mapas de Material por producto (tus claves actuales)
@@ -164,11 +178,12 @@ const MATERIALS: Record<string, string> = {
   "Portavaso Doble Universal": "Papel Kraft",
   "Portavaso Doble Valija (Carry Tray)": "Papel Kraft",
   "Collarín Multi Medida": "Papel Kraft",
-  "Sorbete 23cm (ø9mm)": "Papel Kraft",
+  "Sorbete 23cm (ø9mm) Natural": "Papel Kraft",
+  "Sorbete 23cm (ø9mm) Blanco": "Papel Kraft",
   "Revolvedor 15cm": "Madera",
   // Bandejas
-  "Bandeja 790": "Bagazo de Caña de Azúcar",
-  "Tapa Bandeja 790": "Bagazo de Caña de Azúcar",
+  "Bandeja 850": "Bagazo de Caña de Azúcar",
+  "Tapa Bandeja 850": "Bagazo de Caña de Azúcar",
   "Bandeja N1 12x9cm": "Papel Kraft",
   "Bandeja N2 16x13cm": "Papel Kraft",
   "Bandeja N3 18x14cm": "Papel Kraft",
@@ -188,9 +203,12 @@ const MATERIALS: Record<string, string> = {
   "Tapa Bowl 850": "Bagazo de Caña de Azúcar",
   "Bowl 500": "Bagazo de Caña de Azúcar",
   "Tapa Bowl 500": "Bagazo de Caña de Azúcar",
+  "Bowl 250": "Bagazo de Caña de Azúcar",
+  "Tapa Bowl 250": "Bagazo de Caña de Azúcar",
   "Dip 2oz": "Bagazo de Caña de Azúcar",
   "Tapa Dip 2oz": "Bagazo de Caña de Azúcar",
-  "Caja para Wok (360 cm3 - 12 Oz)": "Papel Kraft",
+  "Caja para Wok Cuadrado (360 cm3 - 12 Oz)": "Papel Kraft",
+  "Caja para Wok Rectangular (360 cm3 - 12 Oz)": "Papel Kraft",
   "Caja para Wok (730 cm3 - 24 Oz)": "Papel Kraft",
   "Caja para Wok (750 cm3 - 25 Oz)": "Papel Kraft",
   "Caja para Wok (1450 cm3 - 49 Oz)": "Papel Kraft",
@@ -226,6 +244,7 @@ const MATERIALS: Record<string, string> = {
   "Vaso 12oz (355ml)": "Bagazo de Caña de Azúcar",
   "Tapa Vaso 12oz": "Bagazo de Caña de Azúcar",
   "Vaso 14oz (415ml)": "Bagazo de Caña de Azúcar",
+  "Tapa Vaso 14oz": "Bagazo de Caña de Azúcar",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -605,15 +624,16 @@ export default function GoBioSampleForm() {
 
             <div className="grid md:grid-cols-3 gap-6 items-start">
               <div className="md:col-span-2 grid sm:grid-cols-2 gap-3">
-                {CATALOG.filter((p) => p.category === selectedCategory).map((item) => {
+                {CATALOG.filter((p) => p.category === selectedCategory).map((item, idx) => {
                   const qty = cart[item.id]?.qty || 0;
+                  const isInitialAboveTheFold = selectedCategory === "Estuches" && idx < 6;
                   return (
                     <div
                       key={item.id}
                       className="flex items-center justify-between rounded-xl border border-[color:var(--gb-border-soft)] px-3 py-3.5 bg-white transition-all duration-200 ease-out hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-px"
                     >
                       <div className="flex items-center gap-3">
-                        <ProductThumb id={item.id} alt={item.name} className="h-14 w-14" />
+                        <ProductThumb id={item.id} alt={item.name} className="h-14 w-14" priority={isInitialAboveTheFold} />
                         <div>
                           <p className="text-sm font-semibold text-[color:var(--gb-neutral-800)]">{item.name}</p>
                           <p className="text-xs text-[color:var(--gb-neutral-600)]">{MATERIALS[item.name] ?? item.category}</p>

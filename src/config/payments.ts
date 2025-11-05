@@ -11,4 +11,4 @@ export const BANK_INFO = {
 
 // Usado para armar link a WhatsApp en la UI de transferencia
 // Formato: 549<codigo_area><numero> sin símbolos ni espacios
-export const WHATSAPP_NUMBER = "5491100000000"; // placeholder
+export const WHATSAPP_NUMBER = "5491127871523"; // placeholder
