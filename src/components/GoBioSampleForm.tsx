@@ -37,6 +37,7 @@ const CATEGORIES = [
   "Platos",
   "Cubiertos",
   "Accesorios",
+  "Bolsas",
 ] as const;
 
 type Category = (typeof CATEGORIES)[number];
@@ -128,11 +129,6 @@ const CATALOG: CatalogItem[] = [
   { id: "bow-tapa-1000-fibra", name: "Tapa Bowl 1000", category: "Bowls" },
   { id: "bow-500-fibra", name: "Bowl 500", category: "Bowls" },
   { id: "bow-tapa-500-fibra", name: "Tapa Bowl 500", category: "Bowls" },
-  { id: "bow-caja-wok-c-360-12oz-kraft", name: "Caja para Wok Cuadrada (360 cm3 - 12 Oz)", category: "Bowls" },
-  { id: "bow-caja-wok-r-360-12oz-kraft", name: "Caja para Wok Rectangular (360 cm3 - 12 Oz)", category: "Bowls" },
-  { id: "bow-caja-wok-730-24oz-kraft", name: "Caja para Wok (730 cm3 - 24 Oz)", category: "Bowls" },
-  { id: "bow-caja-wok-750-25oz-kraft", name: "Caja para Wok (750 cm3 - 25 Oz)", category: "Bowls" },
-  { id: "bow-caja-wok-1450-49oz-kraft", name: "Caja para Wok (1450 cm3 - 49 Oz)", category: "Bowls" },
   { id: "bow-cono-grande-16x9x4-papas", name: "Cono Grande 16x9x4cm (Papas Fritas)", category: "Bowls" },
   { id: "bow-cono-chico-14x9x4-papas", name: "Cono Chico 14x9x4cm (Papas Fritas)", category: "Bowls" },
 
@@ -151,9 +147,6 @@ const CATALOG: CatalogItem[] = [
   { id: "est-hamb-grande-14x14x9-kraft", name: "Estuche Hamburguesa Grande 14x14x9cm", category: "Estuches" },
   { id: "est-hamb-chico-9x8x7-kraft", name: "Estuche Hamburguesa Chico 9x8x7cm", category: "Estuches" },
   { id: "est-sandwich-21x11x8-kraft", name: "Estuche Sandwich 21x11x8cm", category: "Estuches" },
-  { id: "est-103-con-tapa-kraft", name: "Estuche 103 (665ml) 19x15x5cm", category: "Estuches" },
-  { id: "est-105-sin-tapa-kraft", name: "Estuche 105 (950ml) 23x18x5cm", category: "Estuches" },
-  { id: "est-107-sin-tapa-kraft", name: "Estuche 107 (1550ml) 26x20x5cm", category: "Estuches" },
 
   // Platos
   { id: "pla-17cm-bagazo", name: "Plato 17cm", category: "Platos" },
@@ -170,6 +163,17 @@ const CATALOG: CatalogItem[] = [
   { id: "tapa-vaso-12oz", name: "Tapa Vaso 12oz", category: "Vasos" },
   { id: "vaso-14oz", name: "Vaso 14oz (415ml)", category: "Vasos" },
   { id: "tapa-vaso-14oz", name: "Tapa Vaso 14oz", category: "Vasos" },
+
+  // Bolsas
+  { id: "bolsa-camiseta-20x30", name: "Bolsa Camiseta 20x30", category: "Bolsas" },
+  { id: "bolsa-camiseta-30x40", name: "Bolsa Camiseta 30x40", category: "Bolsas" },
+  { id: "bolsa-camiseta-40x50", name: "Bolsa Camiseta 40x50", category: "Bolsas" },
+  { id: "bolsa-arranque-20x20", name: "Bolsa de Arranque 20x20", category: "Bolsas" },
+  { id: "bolsa-arranque-20x30", name: "Bolsa de Arranque 20x30", category: "Bolsas" },
+  { id: "bolsa-arranque-30x40", name: "Bolsa de Arranque 30x40", category: "Bolsas" },
+  { id: "bolsa-rinon-20x30", name: "Bolsa Riñón 20x30", category: "Bolsas" },
+  { id: "bolsa-rinon-30x40", name: "Bolsa Riñón 30x40", category: "Bolsas" },
+  { id: "bolsa-rinon-40x50", name: "Bolsa Riñón 40x50", category: "Bolsas" },
 ];
 
 // Mapas de Material por producto (tus claves actuales)
@@ -207,11 +211,6 @@ const MATERIALS: Record<string, string> = {
   "Tapa Bowl 250": "Bagazo de Caña de Azúcar",
   "Dip 2oz": "Bagazo de Caña de Azúcar",
   "Tapa Dip 2oz": "Bagazo de Caña de Azúcar",
-  "Caja para Wok Cuadrado (360 cm3 - 12 Oz)": "Papel Kraft",
-  "Caja para Wok Rectangular (360 cm3 - 12 Oz)": "Papel Kraft",
-  "Caja para Wok (730 cm3 - 24 Oz)": "Papel Kraft",
-  "Caja para Wok (750 cm3 - 25 Oz)": "Papel Kraft",
-  "Caja para Wok (1450 cm3 - 49 Oz)": "Papel Kraft",
   "Cono Grande 16x9x4cm (Papas Fritas)": "Papel Kraft",
   "Cono Chico 14x9x4cm (Papas Fritas)": "Papel Kraft",
   // Cubiertos
@@ -228,9 +227,6 @@ const MATERIALS: Record<string, string> = {
   "Estuche Hamburguesa Grande 14x14x9cm": "Papel Kraft",
   "Estuche Hamburguesa Chico 9x8x7cm": "Papel Kraft",
   "Estuche Sandwich 21x11x8cm": "Papel Kraft",
-  "Estuche 103 (665ml) 19x15x5cm": "Papel Kraft",
-  "Estuche 105 (950ml) 23x18x5cm": "Papel Kraft",
-  "Estuche 107 (1550ml) 26x20x5cm": "Papel Kraft",
   // Platos
   "Plato 17cm": "Bagazo de Caña de Azúcar",
   "Plato 22cm": "Bagazo de Caña de Azúcar",
@@ -238,18 +234,24 @@ const MATERIALS: Record<string, string> = {
   "Plato 18cm Blanco": "Papel Kraft",
   "Plato 23cm Natural": "Papel Kraft",
   "Plato 23cm Blanco": "Papel Kraft",
-  // Vasos
-  "Vaso 8oz (240ml)": "Bagazo de Caña de Azúcar",
-  "Tapa Vaso 8oz": "Bagazo de Caña de Azúcar",
-  "Vaso 12oz (355ml)": "Bagazo de Caña de Azúcar",
-  "Tapa Vaso 12oz": "Bagazo de Caña de Azúcar",
-  "Vaso 14oz (415ml)": "Bagazo de Caña de Azúcar",
-  "Tapa Vaso 14oz": "Bagazo de Caña de Azúcar",
+  // bolsas
+  "Bolsa Camiseta 20x30": "Bioplástico",
+  "Bolsa Camiseta 30x40": "Bioplástico",
+  "Bolsa Camiseta 40x50": "Bioplástico",
+
+  "Bolsa de Arranque 20x20": "Bioplástico",
+  "Bolsa de Arranque 20x30": "Bioplástico",
+  "Bolsa de Arranque 30x40": "Bioplástico",
+
+  "Bolsa Riñón 20x30": "Bioplástico",
+  "Bolsa Riñón 30x40": "Bioplástico",
+  "Bolsa Riñón 40x50": "Bioplástico",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
   Accesorios: "Accesorios",
   Bandejas: "Bandejas",
+  Bolsas: "Bolsas",
   Bowls: "Bowls",
   Cubiertos: "Cubiertos",
   Estuches: "Estuches",
