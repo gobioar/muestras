@@ -101,10 +101,6 @@ const CATALOG: CatalogItem[] = [
   // Bandejas
   { id: "ban-850", name: "Bandeja 850", category: "Bandejas" },
   { id: "ban-tapa-850", name: "Tapa Bandeja 850", category: "Bandejas" },
-  { id: "ban-n1-12x9", name: "Bandeja N1 12x9cm", category: "Bandejas" },
-  { id: "ban-n2-16x13", name: "Bandeja N2 16x13cm", category: "Bandejas" },
-  { id: "ban-n3-18x14", name: "Bandeja N3 18x14cm", category: "Bandejas" },
-  { id: "ban-n4-20x17", name: "Bandeja N4 20x17cm", category: "Bandejas" },
   { id: "ban-102-300ml-14x11x3-fibra", name: "Bandeja 102 (300ml / 14x11x3cm)", category: "Bandejas" },
   { id: "ban-tapa-102-pet", name: "Tapa Bandeja 102", category: "Bandejas" },
   { id: "ban-103-550ml-18x12x3-fibra", name: "Bandeja 103 (550ml / 18x12x3cm)", category: "Bandejas" },
@@ -113,6 +109,10 @@ const CATALOG: CatalogItem[] = [
   { id: "ban-tapa-105-pet", name: "Tapa Bandeja 105", category: "Bandejas" },
   { id: "ban-105-ovalada-750ml-22x14x4-fibra", name: "Bandeja 105 Ovalada (750ml / 22x14x4cm)", category: "Bandejas" },
   { id: "ban-tapa-ovalada-pet", name: "Tapa Bandeja Ovalada", category: "Bandejas" },
+  { id: "ban-n1-12x9", name: "Bandeja N1 12x9cm", category: "Bandejas" },
+  { id: "ban-n2-16x13", name: "Bandeja N2 16x13cm", category: "Bandejas" },
+  { id: "ban-n3-18x14", name: "Bandeja N3 18x14cm", category: "Bandejas" },
+  { id: "ban-n4-20x17", name: "Bandeja N4 20x17cm", category: "Bandejas" },
 
   // Bowls
   { id: "bow-1000-blanco", name: "Bowl 1000", category: "Bowls" },
@@ -125,10 +125,10 @@ const CATALOG: CatalogItem[] = [
   { id: "bow-tapa-250", name: "Tapa Bowl 250", category: "Bowls" },
   { id: "bow-dip-2oz", name: "Dip 2oz", category: "Bowls" },
   { id: "bow-tapa-dip-2oz", name: "Tapa Dip 2oz", category: "Bowls" },
-  { id: "bow-1000-fibra", name: "Bowl 1000", category: "Bowls" },
-  { id: "bow-tapa-1000-fibra", name: "Tapa Bowl 1000", category: "Bowls" },
-  { id: "bow-500-fibra", name: "Bowl 500", category: "Bowls" },
-  { id: "bow-tapa-500-fibra", name: "Tapa Bowl 500", category: "Bowls" },
+  { id: "bow-1000-fibra", name: "Bowl 1000 Natural", category: "Bowls" },
+  { id: "bow-tapa-1000-fibra", name: "Tapa Bowl 1000 Transparente", category: "Bowls" },
+  { id: "bow-500-fibra", name: "Bowl 500 Natural", category: "Bowls" },
+  { id: "bow-tapa-500-fibra", name: "Tapa Bowl 500 Transparente", category: "Bowls" },
   { id: "bow-cono-grande-16x9x4-papas", name: "Cono Grande 16x9x4cm (Papas Fritas)", category: "Bowls" },
   { id: "bow-cono-chico-14x9x4-papas", name: "Cono Chico 14x9x4cm (Papas Fritas)", category: "Bowls" },
 
@@ -138,7 +138,7 @@ const CATALOG: CatalogItem[] = [
   { id: "cub-tenedor-madera-16cm", name: "Tenedor 16cm", category: "Cubiertos" },
 
   // Estuches
-  { id: "est-1500-3-comp", name: "Estuche 1500 con 3 Compartimentos", category: "Estuches" },
+  { id: "est-1250-3-comp", name: "Estuche 1250 con 3 Compartimentos", category: "Estuches" },
   { id: "est-950-alto", name: "Estuche 950 Alto", category: "Estuches" },
   { id: "est-950-bajo", name: "Estuche 950 Bajo", category: "Estuches" },
   { id: "est-600-rect", name: "Estuche 600 Rectangular", category: "Estuches" },
@@ -163,6 +163,7 @@ const CATALOG: CatalogItem[] = [
   { id: "tapa-vaso-12oz", name: "Tapa Vaso 12oz", category: "Vasos" },
   { id: "vaso-14oz", name: "Vaso 14oz (415ml)", category: "Vasos" },
   { id: "tapa-vaso-14oz", name: "Tapa Vaso 14oz", category: "Vasos" },
+  { id: "vaso-4oz", name: "Vaso 4oz (120ml)", category: "Vasos" },
 
   // Bolsas
   { id: "bolsa-camiseta-20x30", name: "Bolsa Camiseta 20x30", category: "Bolsas" },
@@ -188,10 +189,6 @@ const MATERIALS: Record<string, string> = {
   // Bandejas
   "Bandeja 850": "Bagazo de Caña de Azúcar",
   "Tapa Bandeja 850": "Bagazo de Caña de Azúcar",
-  "Bandeja N1 12x9cm": "Papel Kraft",
-  "Bandeja N2 16x13cm": "Papel Kraft",
-  "Bandeja N3 18x14cm": "Papel Kraft",
-  "Bandeja N4 20x17cm": "Papel Kraft",
   "Bandeja 102 (300ml / 14x11x3cm)": "Fibra Natural",
   "Tapa Bandeja 102": "PET Cristal",
   "Bandeja 103 (550ml / 18x12x3cm)": "Fibra Natural",
@@ -200,6 +197,18 @@ const MATERIALS: Record<string, string> = {
   "Tapa Bandeja 105": "PET Cristal",
   "Bandeja 105 Ovalada (750ml / 22x14x4cm)": "Fibra Natural",
   "Tapa Bandeja Ovalada": "PET Cristal",
+  "Bandeja N1 12x9cm": "Papel Kraft",
+  "Bandeja N2 16x13cm": "Papel Kraft",
+  "Bandeja N3 18x14cm": "Papel Kraft",
+  "Bandeja N4 20x17cm": "Papel Kraft",
+  // Vasos
+  "Vaso 8oz (240ml)": "Bagazo de Caña de Azúcar",
+  "Tapa Vaso 8oz": "Bagazo de Caña de Azúcar",
+  "Vaso 12oz (355ml)": "Bagazo de Caña de Azúcar",
+  "Tapa Vaso 12oz": "Bagazo de Caña de Azúcar",
+  "Vaso 14oz (415ml)": "Bagazo de Caña de Azúcar",
+  "Tapa Vaso 14oz": "Bagazo de Caña de Azúcar",
+  "Vaso 4oz (120ml)": "Bagazo de Caña de Azúcar",
   // Bowls
   "Bowl 1000": "Bagazo de Caña de Azúcar",
   "Tapa Bowl 1000": "Bagazo de Caña de Azúcar",
@@ -211,6 +220,10 @@ const MATERIALS: Record<string, string> = {
   "Tapa Bowl 250": "Bagazo de Caña de Azúcar",
   "Dip 2oz": "Bagazo de Caña de Azúcar",
   "Tapa Dip 2oz": "Bagazo de Caña de Azúcar",
+  "Bowl 1000 Natural": "Fibra Natural",
+  "Tapa Bowl 1000 Transparente": "PET Cristal",
+  "Bowl 500 Natural": "Fibra Natural",
+  "Tapa Bowl 500 Transparente": "PET Cristal",
   "Cono Grande 16x9x4cm (Papas Fritas)": "Papel Kraft",
   "Cono Chico 14x9x4cm (Papas Fritas)": "Papel Kraft",
   // Cubiertos
@@ -218,7 +231,7 @@ const MATERIALS: Record<string, string> = {
   "Cuchara 16cm": "Madera de Abedul",
   "Tenedor 16cm": "Madera de Abedul",
   // Estuches
-  "Estuche 1500 con 3 Compartimentos": "Bagazo de Caña de Azúcar",
+  "Estuche 1250 con 3 Compartimentos": "Bagazo de Caña de Azúcar",
   "Estuche 950 Alto": "Bagazo de Caña de Azúcar",
   "Estuche 950 Bajo": "Bagazo de Caña de Azúcar",
   "Estuche 600 Rectangular": "Bagazo de Caña de Azúcar",
