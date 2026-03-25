@@ -273,21 +273,6 @@ export async function POST(req: NextRequest) {
   </div>
 `;
 
-    // NUEVO: si es transferencia, enviar un aviso breve al admin sin repetir datos
-    const adminSubject = paymentMethod === "transfer" ? `Pago recibido – Transferencia bancaria (Ref: ${id})` : subject;
-    const adminTextFinal = paymentMethod === "transfer"
-      ? `Se recibió un pago por transferencia bancaria para la solicitud de muestras.\n\nReferencia: ${id}\n${transferReceipt?.name ? `Comprobante adjunto: ${transferReceipt.name}` : "Sin comprobante adjunto"}`
-      : adminText;
-    const adminHtmlFinal = paymentMethod === "transfer"
-      ? `
-        <div style="font-family:Montserrat,Arial,sans-serif;color:#363636;line-height:1.5">
-          <h2 style="margin:0 0 12px;font-weight:700;color:#32AA93">Pago recibido – Transferencia bancaria</h2>
-          <p style="margin:0 0 12px">Referencia: <strong>${id}</strong></p>
-          <p style="margin:0 0 4px">${transferReceipt?.name ? `Comprobante adjunto: <strong>${transferReceipt.name}</strong>` : "Sin comprobante adjunto"}</p>
-        </div>
-      `
-      : adminHtml;
-
     // Adjuntos (solo si hay comprobante en base64)
     const attachments: any[] | undefined = transferReceipt?.base64
       ? [
@@ -300,23 +285,59 @@ export async function POST(req: NextRequest) {
       : undefined;
 
     // Send admin email
-    try {
-      await transporter.sendMail({
-        from,
-        to: adminTo,
-        subject: adminSubject,
-        text: adminTextFinal,
-        html: adminHtmlFinal,
-        replyTo: email,
-        attachments,
-      });
-    } catch (sendErr: any) {
-      console.error("/api/samples admin send error", sendErr);
-      const message = sendErr?.message || "Admin email send failed";
-      const payload: any = { error: "Error al enviar la solicitud." };
-      if (process.env.NODE_ENV !== "production") payload.details = message;
-      return NextResponse.json(payload, { status: 500 });
-    }
+    // Send admin request email
+try {
+  console.log("[samples] sending admin request email", { id, paymentMethod, adminTo });
+
+  await transporter.sendMail({
+    from,
+    to: adminTo,
+    subject,
+    text: adminText,
+    html: adminHtml,
+    replyTo: email,
+  });
+} catch (sendErr: any) {
+  console.error("/api/samples admin request email error", sendErr);
+  const message = sendErr?.message || "Admin request email send failed";
+  const payload: any = { error: "Error al enviar la solicitud." };
+  if (process.env.NODE_ENV !== "production") payload.details = message;
+  return NextResponse.json(payload, { status: 500 });
+}
+
+// Send admin transfer payment email
+if (paymentMethod === "transfer") {
+  try {
+    console.log("[samples] sending admin transfer payment email", { id, paymentMethod, adminTo });
+
+    await transporter.sendMail({
+      from,
+      to: adminTo,
+      subject: `Pago recibido – Transferencia bancaria (Ref: ${id})`,
+      text:
+        `Se recibió un pago por transferencia bancaria para la solicitud de muestras.\n\n` +
+        `Referencia: ${id}\n` +
+        `${transferReceipt?.name ? `Comprobante adjunto: ${transferReceipt.name}` : "Sin comprobante adjunto"}`,
+      html: `
+        <div style="font-family:Montserrat,Arial,sans-serif;color:#363636;line-height:1.5">
+          <h2 style="margin:0 0 12px;font-weight:700;color:#32AA93">Pago recibido – Transferencia bancaria</h2>
+          <p style="margin:0 0 12px">Referencia: <strong>${id}</strong></p>
+          <p style="margin:0 0 4px">
+            ${transferReceipt?.name ? `Comprobante adjunto: <strong>${transferReceipt.name}</strong>` : "Sin comprobante adjunto"}
+          </p>
+        </div>
+      `,
+      replyTo: email,
+      attachments,
+    });
+  } catch (sendErr: any) {
+    console.error("/api/samples admin transfer email error", sendErr);
+    const message = sendErr?.message || "Admin transfer email send failed";
+    const payload: any = { error: "Error al enviar el aviso de pago." };
+    if (process.env.NODE_ENV !== "production") payload.details = message;
+    return NextResponse.json(payload, { status: 500 });
+  }
+}
 
     // Send copy/auto-response to requester (best-effort)
     try {
