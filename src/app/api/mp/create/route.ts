@@ -14,26 +14,50 @@ export async function POST(req: NextRequest) {
     const { provincia, amountOverride, email, clientId, cart } = body || {};
 
     if (!provincia || !clientId) {
-      return NextResponse.json({ error: "Faltan datos: provincia y clientId son obligatorios" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Faltan datos: provincia y clientId son obligatorios" },
+        { status: 400 }
+      );
     }
 
     const feeByProv = getShippingFee(provincia);
     if (feeByProv == null && typeof amountOverride !== "number") {
-      return NextResponse.json({ error: "No se pudo determinar el monto del envío" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No se pudo determinar el monto del envío" },
+        { status: 400 }
+      );
     }
 
     // Business rule: prefer override if valid, else province fee
-    const validatedAmount = typeof amountOverride === "number" && amountOverride >= 0 ? amountOverride : (feeByProv || 0);
+    const validatedAmount =
+      typeof amountOverride === "number" && amountOverride >= 0
+        ? amountOverride
+        : (feeByProv || 0);
 
     // Env config
     const accessToken = process.env.MP_ACCESS_TOKEN;
-    const successUrl = process.env.MP_SUCCESS_URL || "/gracias?status=approved";
-    const failureUrl = process.env.MP_FAILURE_URL || "/gracias?status=failed";
-    const pendingUrl = process.env.MP_PENDING_URL || "/gracias?status=pending";
+
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.SITE_URL ||
+      "https://muestras.gobio.ar";
+
+    const successUrl = process.env.MP_SUCCESS_URL || `${siteUrl}/gracias`;
+    const failureUrl = process.env.MP_FAILURE_URL || `${siteUrl}/gracias`;
+    const pendingUrl = process.env.MP_PENDING_URL || `${siteUrl}/gracias`;
 
     if (!accessToken) {
-      return NextResponse.json({ error: "Configuración inválida de Mercado Pago" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Configuración inválida de Mercado Pago" },
+        { status: 500 }
+      );
     }
+
+    console.info("[MP] back_urls", {
+      successUrl,
+      failureUrl,
+      pendingUrl,
+    });
 
     // Create preference via Mercado Pago API
     const preferencePayload = {
@@ -71,7 +95,10 @@ export async function POST(req: NextRequest) {
     if (!res.ok) {
       const errText = await res.text();
       console.error("[MP] create preference error", errText);
-      return NextResponse.json({ error: "No se pudo crear la preferencia de pago" }, { status: 500 });
+      return NextResponse.json(
+        { error: "No se pudo crear la preferencia de pago" },
+        { status: 500 }
+      );
     }
 
     const data = await res.json();
@@ -91,7 +118,11 @@ export async function POST(req: NextRequest) {
       cart,
     });
 
-    return NextResponse.json({ init_point, preference_id, amount: validatedAmount });
+    return NextResponse.json({
+      init_point,
+      preference_id,
+      amount: validatedAmount,
+    });
   } catch (err: any) {
     console.error("/api/mp/create error", err);
     return NextResponse.json({ error: "Error inesperado" }, { status: 500 });
