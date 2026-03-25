@@ -393,66 +393,44 @@ export default function GoBioSampleForm() {
     return Object.keys(e).length === 0;
   };
 
-  const goToResumen = async () => {
-    setServerError(null);
-    setSuccess(null);
-    if (!validate()) {
-      setServerError("Revise los campos obligatorios.");
-      return;
-    }
+  const goToResumen = async (e?: React.FormEvent) => {
+  e?.preventDefault();
+  setServerError(null);
+  setSuccess(null);
+
+  if (!validate()) {
+    setServerError("Revise los campos obligatorios.");
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+
+    const clientId = generateClientId();
+    const cartPayload = Object.values(cart).map((it) => ({
+      id: it.id,
+      name: it.name,
+      category: it.category,
+      qty: it.qty,
+    }));
+
+    const payload = {
+      form,
+      cart: cartPayload,
+      clientId,
+      provincia: form.provincia,
+      shippingFee,
+    };
+
     try {
-      setSubmitting(true);
-      const clientId = generateClientId();
-      const cartPayload = Object.values(cart).map((it) => ({ id: it.id, name: it.name, category: it.category, qty: it.qty }));
-      const payload = {
-        form,
-        cart: cartPayload,
-        clientId,
-        provincia: form.provincia,
-        shippingFee,
-      };
-      try {
-        localStorage.setItem("gobio.checkout", JSON.stringify(payload));
-      } catch {}
+      localStorage.setItem("gobio.checkout", JSON.stringify(payload));
+    } catch {}
 
-      // Disparar emails vía API antes de navegar
-      try {
-        const products = cartPayload.map((p) => ({ product: p.name, quantity: String(p.qty) }));
-        const res = await fetch("/api/samples", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nombreApellido: form.nombreApellido,
-            telefono: form.telefono,
-            email: form.email,
-            direccion: form.direccion,
-            localidad: form.localidad,
-            codigoPostal: form.codigoPostal,
-            provincia: form.provincia,
-            products,
-            comentarios: form.comentarios,
-            whatsappPreferred: false,
-            whatsappTime: "",
-            consent: true,
-            clientId,
-            shippingFee,
-          }),
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data?.error || "No se pudo enviar el correo.");
-        }
-      } catch (e: unknown) {
-        console.warn("/api/samples fallo no bloqueante:", e);
-        const msg = e instanceof Error ? e.message : "No se pudo enviar el correo.";
-        setServerError(`${msg} Podrás continuar y ver el resumen igualmente.`);
-      }
-
-      router.push("/resumen-pago");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    router.push("/resumen-pago");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <Card className="max-w-[1180px] mx-auto shadow-sm rounded-2xl border border-[color:var(--gb-border-soft)]">
@@ -763,7 +741,7 @@ export default function GoBioSampleForm() {
           )}
 
           <div className="flex items-center gap-4">
-            <Button type="button" onClick={goToResumen} disabled={submitting} className="h-12 rounded-xl px-6 bg-[linear-gradient(135deg,#32AA93_0%,#7CBF81_100%)] hover:brightness-[1.03] disabled:opacity-40">
+            <Button type="submit" disabled={submitting} className="h-12 rounded-xl px-6 bg-[linear-gradient(135deg,#32AA93_0%,#7CBF81_100%)] hover:brightness-[1.03] disabled:opacity-40">
               {submitting ? "Procesando…" : "Próximo Paso"}
             </Button>
             <span className="text-sm text-muted-foreground">Continuar a resumen y pago</span>

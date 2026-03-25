@@ -144,7 +144,7 @@ export const ResumenPago = () => {
           products,
           clientId: payload.clientId,
           consent: true,
-          notifyUser: false,
+          notifyUser: true,
         }),
       });
       if (!res.ok) {

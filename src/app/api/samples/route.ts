@@ -24,13 +24,14 @@ export async function POST(req: NextRequest) {
       localidad,
       codigoPostal,
       provincia,
+      empresa,
+      dniCuit,
       products = [],
       comentarios,
       whatsappPreferred,
       whatsappTime,
       consent,
       clientId,
-      // Nuevos campos para flujo de envío/pago
       shippingFee: clientShippingFee,
       paymentMethod,
       mpPreferenceId,
@@ -145,6 +146,8 @@ export async function POST(req: NextRequest) {
     const adminText = `Nueva solicitud de muestras (ID: ${id})\n\n` +
       `Datos de contacto:\n` +
       `- Nombre y apellido: ${nombreApellido}\n` +
+      `- Empresa: ${empresa || "-"}\n` +
+      `- DNI / CUIT: ${dniCuit || "-"}\n` +
       `- Teléfono: ${telefono}\n` +
       `- Correo: ${email}\n\n` +
       `Dirección de entrega:\n` +
@@ -177,6 +180,8 @@ export async function POST(req: NextRequest) {
         <h3 style="margin:16px 0 8px; color:#363636">Datos de contacto</h3>
         <ul style="margin:0 0 16px; padding-left:18px">
           <li><strong>Nombre y apellido:</strong> ${nombreApellido}</li>
+          <li><strong>Empresa:</strong> ${empresa || "-"}</li>
+          <li><strong>DNI / CUIT:</strong> ${dniCuit || "-"}</li>
           <li><strong>Teléfono:</strong> ${telefono}</li>
           <li><strong>Correo:</strong> ${email}</li>
         </ul>
@@ -208,46 +213,65 @@ export async function POST(req: NextRequest) {
     `;
 
     const userHtml = `
-      <div style="font-family:Montserrat,Arial,sans-serif; color:#363636; line-height:1.6">
-        <div style="background:linear-gradient(135deg,#32AA93 0%,#7CBF81 100%); padding:18px; border-radius:14px 14px 0 0; color:white">
-          <h1 style="margin:0; font-size:20px; font-weight:700">¡Gracias por confiar en GoBio!</h1>
-          <p style="margin:6px 0 0; opacity:0.95">Recibimos tu solicitud de muestras</p>
-        </div>
-        <div style="border:1px solid #E6EBF2; border-top:none; border-radius:0 0 14px 14px; padding:20px; background:#ffffff">
-          <p style="margin:0 0 12px">Referencia: <strong>${id}</strong></p>
-          <p style="margin:0 0 16px">En breve un asesor se comunicará para coordinar la entrega. Mientras tanto, te compartimos el resumen de tu solicitud:</p>
+  <div style="font-family:Montserrat,Arial,sans-serif; color:#363636; line-height:1.6">
+    <div style="background:linear-gradient(135deg,#32AA93 0%,#7CBF81 100%); padding:18px; border-radius:14px 14px 0 0; color:white">
+      <h1 style="margin:0; font-size:20px; font-weight:700">¡Gracias por confiar en GoBio!</h1>
+      <p style="margin:6px 0 0; opacity:0.95">Recibimos tu solicitud de muestras</p>
+    </div>
+    <div style="border:1px solid #E6EBF2; border-top:none; border-radius:0 0 14px 14px; padding:20px; background:#ffffff">
+      <p style="margin:0 0 12px">Referencia: <strong>${id}</strong></p>
+      <p style="margin:0 0 16px">
+        Tu solicitud fue procesada correctamente. Dentro de los próximos 
+        <strong>2 a 5 días hábiles</strong> vas a recibir la caja de muestras en la dirección indicada.
+        <br/><br/>
+        Solo nos comunicaremos en caso de que surja alguna situación particular con el envío. 
+        Mientras tanto, ya estamos preparando tu pedido.
+      </p>
 
-          <h3 style="margin:0 0 8px; color:#363636">Tus datos</h3>
-          <ul style="margin:0 0 16px; padding-left:18px; color:#363636">
-            <li><strong>Nombre y apellido:</strong> ${nombreApellido}</li>
-            <li><strong>Teléfono:</strong> ${telefono}</li>
-            <li><strong>Correo:</strong> ${email}</li>
-          </ul>
-          <h3 style="margin:0 0 8px; color:#363636">Dirección de entrega</h3>
-          <ul style="margin:0 0 16px; padding-left:18px; color:#363636">
-            <li><strong>Dirección:</strong> ${direccion}</li>
-            <li><strong>Localidad:</strong> ${localidad}</li>
-            <li><strong>Provincia:</strong> ${provincia}</li>
-            <li><strong>Código postal:</strong> ${codigoPostal}</li>
-          </ul>
-          <h3 style="margin:0 0 8px; color:#363636">Productos solicitados</h3>
-          <ul style="margin:0 0 16px; padding-left:18px; color:#363636">${productLinesHtml || "<li>(sin productos)</li>"}</ul>
-          <p style="margin:0 0 16px"><strong>Costo de envío estimado:</strong> $ ${new Intl.NumberFormat("es-AR").format(shippingFeeToUse)}</p>
-          ${comentarios ? `<p style="margin:0 0 16px"><strong>Comentarios:</strong> ${comentarios}</p>` : ""}
+      <h3 style="margin:0 0 8px; color:#363636">Tus datos</h3>
+      <ul style="margin:0 0 16px; padding-left:18px; color:#363636">
+        <li><strong>Nombre y apellido:</strong> ${nombreApellido}</li>
+        <li><strong>Empresa:</strong> ${empresa || "-"}</li>
+        <li><strong>DNI / CUIT:</strong> ${dniCuit || "-"}</li>
+        <li><strong>Teléfono:</strong> ${telefono}</li>
+        <li><strong>Correo:</strong> ${email}</li>
+      </ul>
 
-          <div style="margin:20px 0; padding:14px; background:#FAFAFA; border:1px solid #E6EBF2; border-radius:12px; color:#363636">
-            <p style="margin:0 0 6px"><strong>Próximos pasos</strong></p>
-            <ol style="margin:0; padding-left:18px">
-              <li>Un asesor de GoBio confirmará tu solicitud y la fecha de entrega.</li>
-              <li>Recibirás novedades por correo o WhatsApp según tu preferencia.</li>
-              <li>Probá las muestras en tu operación. Te acompañamos en el proceso.</li>
-            </ol>
-          </div>
+      <h3 style="margin:0 0 8px; color:#363636">Dirección de entrega</h3>
+      <ul style="margin:0 0 16px; padding-left:18px; color:#363636">
+        <li><strong>Dirección:</strong> ${direccion}</li>
+        <li><strong>Localidad:</strong> ${localidad}</li>
+        <li><strong>Provincia:</strong> ${provincia}</li>
+        <li><strong>Código postal:</strong> ${codigoPostal}</li>
+      </ul>
 
-          <p style="margin:16px 0 0; color:#667387; font-size:13px">¿Dudas o cambios? Escribinos a <a href="mailto:hola@gobio.ar" style="color:#32AA93; text-decoration:none">hola@gobio.ar</a>. Estamos para ayudarte.</p>
-        </div>
+      <h3 style="margin:0 0 8px; color:#363636">Productos solicitados</h3>
+      <ul style="margin:0 0 16px; padding-left:18px; color:#363636">${productLinesHtml || "<li>(sin productos)</li>"}</ul>
+      <p style="margin:0 0 16px"><strong>Costo de envío estimado:</strong> $ ${new Intl.NumberFormat("es-AR").format(shippingFeeToUse)}</p>
+      ${comentarios ? `<p style="margin:0 0 16px"><strong>Comentarios:</strong> ${comentarios}</p>` : ""}
+
+      <div style="margin:20px 0; padding:14px; background:#FAFAFA; border:1px solid #E6EBF2; border-radius:12px; color:#363636">
+        <p style="margin:0 0 6px"><strong>Próximos pasos</strong></p>
+        <ol style="margin:0; padding-left:18px">
+          <li>Esperá la entrega de tus muestras en los próximos días.</li>
+          <li>Probá los envases biodegradables en tu operación.</li>
+          <li>Solicitá un presupuesto con descuento al 
+            <a href="https://wa.me/5491127871523" style="color:#32AA93; text-decoration:none">
+              +54 9 11 2787 1523
+            </a>
+          </li>
+        </ol>
       </div>
-    `;
+
+      <p style="margin:16px 0 0; color:#667387; font-size:13px">
+        ¿Dudas o cambios? Escribinos a 
+        <a href="mailto:hola@gobio.ar" style="color:#32AA93; text-decoration:none">
+          hola@gobio.ar
+        </a>. Estamos para ayudarte.
+      </p>
+    </div>
+  </div>
+`;
 
     // NUEVO: si es transferencia, enviar un aviso breve al admin sin repetir datos
     const adminSubject = paymentMethod === "transfer" ? `Pago recibido – Transferencia bancaria (Ref: ${id})` : subject;
