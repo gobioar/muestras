@@ -17,7 +17,6 @@ export default function MPReturnResult() {
     preference_id?: string;
     transaction_amount?: number;
   } | null>(null);
-  const [mailSent, setMailSent] = useState(false);
 
   const params = useMemo(() => {
     return {
@@ -56,7 +55,6 @@ export default function MPReturnResult() {
 
         const data = await res.json();
         setVerified(data);
-
       } catch (e: any) {
         setError(e.message || "Error inesperado");
       } finally {
@@ -66,77 +64,6 @@ export default function MPReturnResult() {
 
     verify();
   }, [params.payment_id, params.preference_id, params.status]);
-
-  useEffect(() => {
-    const status = (verified?.status || params.status || "").toLowerCase();
-    if (status !== "approved") return;
-
-    try {
-      const raw = localStorage.getItem("gobio.checkout");
-      if (!raw) return;
-
-      const checkout = JSON.parse(raw);
-      const clientId: string = checkout?.clientId;
-      if (!clientId) return;
-
-      const dedupeKey = `mpMail:${clientId}`;
-      if (mailSent || sessionStorage.getItem(dedupeKey) === "1") return;
-
-      const form = checkout?.form || {};
-      const cart = Array.isArray(checkout?.cart) ? checkout.cart : [];
-      const products = cart.map((it: any) => ({
-        product: it.name,
-        quantity: String(it.qty),
-      }));
-
-      (async () => {
-        try {
-          const res = await fetch("/api/samples", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              nombreApellido: form.nombreApellido,
-              telefono: form.telefono,
-              email: form.email,
-              direccion: form.direccion,
-              localidad: form.localidad,
-              codigoPostal: form.codigoPostal,
-              provincia: form.provincia,
-              empresa: form.empresa,
-              dniCuit: form.dniCuit,
-              products,
-              comentarios: form.comentarios,
-              whatsappPreferred: false,
-              whatsappTime: "",
-              consent: true,
-              clientId,
-              shippingFee: checkout?.shippingFee ?? null,
-              paymentMethod: "mp",
-              mpPreferenceId: verified?.preference_id || params.preference_id || undefined,
-              mpPaymentId: verified?.payment_id || params.payment_id || undefined,
-              mpStatus: "approved",
-              notifyUser: true,
-            }),
-          });
-
-          if (!res.ok) {
-            throw new Error("No se pudo registrar la solicitud.");
-          }
-
-          setMailSent(true);
-          sessionStorage.setItem(dedupeKey, "1");
-
-          try {
-            localStorage.removeItem("gobio.checkout");
-          } catch {}
-        } catch {
-          // no-op
-        }
-      })();
-    } catch {
-      // no-op
-    }
-  }, [verified?.status, verified?.payment_id, verified?.preference_id, params.status, params.payment_id, params.preference_id, mailSent]);
 
   const StatusBadge = ({ status }: { status?: string }) => {
     const norm = (status || "").toLowerCase();
@@ -250,7 +177,7 @@ export default function MPReturnResult() {
           {(verified?.status || params.status)?.toLowerCase() === "approved" ? (
             <div className="rounded-lg border border-[color:var(--gb-border-soft)] bg-[rgba(50,170,147,.08)] p-4">
               <p className="text-sm text-[color:var(--gb-neutral-800)]">
-                ¡Gracias! Su pago fue aprobado. Enviaremos la confirmación por correo y prepararemos el despacho
+                ¡Gracias! Su pago fue aprobado. Prepararemos el despacho
                 (2 a 5 días hábiles).
               </p>
             </div>
