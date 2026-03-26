@@ -72,77 +72,77 @@ export const ResumenPago = () => {
   }, [payload]);
 
   const startMpCheckout = async () => {
-    setMpError(null);
-    setServerError(null);
+  setMpError(null);
+  setServerError(null);
 
-    if (!payload) return;
-    if (!payload.form.provincia) {
-      setServerError("Seleccione una provincia.");
-      return;
+  if (!payload) return;
+  if (!payload.form.provincia) {
+    setServerError("Seleccione una provincia.");
+    return;
+  }
+  if (shippingFee == null) {
+    setServerError("No se pudo calcular el costo de envío.");
+    return;
+  }
+  if (totalUnits <= 0) {
+    setServerError("Seleccione al menos un producto.");
+    return;
+  }
+
+  try {
+    setMpLoading(true);
+
+    const clientId = payload.clientId || generateClientId();
+
+    const saveRes = await fetch("/api/checkout/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        clientId,
+        form: payload.form,
+        cart: payload.cart,
+        shippingFee,
+      }),
+    });
+
+    if (!saveRes.ok) {
+      const data = await saveRes.json().catch(() => ({}));
+      throw new Error(data?.error || "No se pudo guardar la solicitud");
     }
-    if (shippingFee == null) {
-      setServerError("No se pudo calcular el costo de envío.");
-      return;
+
+    const res = await fetch("/api/mp/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        provincia: payload.form.provincia,
+        amountOverride: shippingFee ?? undefined,
+        email: payload.form.email || undefined,
+        clientId,
+        cart: payload.cart,
+      }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data?.error || "No se pudo iniciar el pago");
     }
-    if (totalUnits <= 0) {
-      setServerError("Seleccione al menos un producto.");
-      return;
+
+    const data = await res.json();
+    const url: string | undefined = data?.init_point;
+
+    if (url) {
+      window.location.href = url;
+    } else {
+      throw new Error("Respuesta inválida del servidor");
     }
-
-    try {
-      setMpLoading(true);
-
-      const clientId = payload.clientId || generateClientId();
-
-      const notifyRes = await fetch("/api/notify-payment-intent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          clientId,
-          form: payload.form,
-          cart: payload.cart,
-          shippingFee,
-        }),
-      });
-
-      if (!notifyRes.ok) {
-        const data = await notifyRes.json().catch(() => ({}));
-        throw new Error(data?.details || data?.error || "No se pudo enviar el aviso previo por mail");
-      }
-
-      const res = await fetch("/api/mp/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provincia: payload.form.provincia,
-          amountOverride: shippingFee ?? undefined,
-          email: payload.form.email || undefined,
-          clientId,
-          cart: payload.cart,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "No se pudo iniciar el pago");
-      }
-
-      const data = await res.json();
-      const url: string | undefined = data?.init_point;
-
-      if (url) {
-        window.location.href = url;
-      } else {
-        throw new Error("Respuesta inválida del servidor");
-      }
-    } catch (e: any) {
-      setMpError(e?.message || "Error inesperado al crear el pago");
-    } finally {
-      setMpLoading(false);
-    }
-  };
+  } catch (e: any) {
+    setMpError(e?.message || "Error inesperado al crear el pago");
+  } finally {
+    setMpLoading(false);
+  }
+};
 
   const handleReceiptChange = async (file?: File | null) => {
     if (!file) {

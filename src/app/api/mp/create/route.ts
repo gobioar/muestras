@@ -3,11 +3,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 import { getShippingFee } from "@/config/shipping";
+import { supabase } from "@/lib/supabase";
 
-// Create Mercado Pago preference (Checkout Pro)
-// Inputs (JSON): { provincia: string; amountOverride?: number; email?: string; clientId: string; cart?: any[] }
-// Business rule: amount = amountOverride OR shipping fee by province (validated server-side)
-// Returns: { init_point, preference_id, amount }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -28,13 +25,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Business rule: prefer override if valid, else province fee
     const validatedAmount =
       typeof amountOverride === "number" && amountOverride >= 0
         ? amountOverride
-        : (feeByProv || 0);
+        : feeByProv || 0;
 
-    // Env config
     const accessToken = process.env.MP_ACCESS_TOKEN;
 
     const siteUrl =
@@ -45,6 +40,7 @@ export async function POST(req: NextRequest) {
     const successUrl = process.env.MP_SUCCESS_URL || `${siteUrl}/gracias`;
     const failureUrl = process.env.MP_FAILURE_URL || `${siteUrl}/gracias`;
     const pendingUrl = process.env.MP_PENDING_URL || `${siteUrl}/gracias`;
+    const notificationUrl = `${siteUrl}/api/mp/webhook`;
 
     if (!accessToken) {
       return NextResponse.json(
@@ -53,13 +49,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.info("[MP] back_urls", {
-      successUrl,
-      failureUrl,
-      pendingUrl,
-    });
-
-    // Create preference via Mercado Pago API
     const preferencePayload = {
       items: [
         {
@@ -76,6 +65,8 @@ export async function POST(req: NextRequest) {
       },
       auto_return: "approved",
       payer: email ? { email } : undefined,
+      external_reference: clientId,
+      notification_url: notificationUrl,
       metadata: {
         clientId,
         provincia,
@@ -105,7 +96,21 @@ export async function POST(req: NextRequest) {
     const init_point = data.init_point || data.sandbox_init_point;
     const preference_id = data.id;
 
-    // Minimal server log (no DB):
+    const { error: updateError } = await supabase
+      .from("sample_orders")
+      .update({
+        mp_preference_id: preference_id,
+      })
+      .eq("client_id", clientId);
+
+    if (updateError) {
+      console.error("DB update error", updateError);
+      return NextResponse.json(
+        { error: "No se pudo actualizar la solicitud" },
+        { status: 500 }
+      );
+    }
+
     console.info("[ORDER] iniciado", {
       ts: new Date().toISOString(),
       clientId,
