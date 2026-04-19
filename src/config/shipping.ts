@@ -2,7 +2,7 @@
 // Editá los valores según tus tarifas. 0 son placeholders.
 // Usado tanto en el cliente (UI) como en el servidor (emails/cálculo seguro).
 export const SHIPPING_FEES: Record<string, number> = {
-  "CABA": 4868,
+  "CABA": 5,
   "GBA Gran Buenos Aires": 8338,
   "Buenos Aires Interior": 15846,
   "Catamarca": 18910,
