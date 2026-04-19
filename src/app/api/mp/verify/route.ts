@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { reconcileMercadoPagoOrder } from "@/lib/mercadopago-order";
+import {
+  reconcileMercadoPagoOrder,
+  sendMercadoPagoFallbackAdminEmail,
+} from "@/lib/mercadopago-order";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,9 +42,19 @@ export async function GET(req: NextRequest) {
 
       if (notify === "true") {
         try {
-          await reconcileMercadoPagoOrder(data);
+          const reconciled = await reconcileMercadoPagoOrder(data, {
+            preferenceIdHint: preference_id,
+          });
+          if (!reconciled?.ok) {
+            await sendMercadoPagoFallbackAdminEmail(data, {
+              preferenceIdHint: preference_id,
+            });
+          }
         } catch (reconcileError) {
           console.error("/api/mp/verify reconcile error", reconcileError);
+          await sendMercadoPagoFallbackAdminEmail(data, {
+            preferenceIdHint: preference_id,
+          });
         }
       }
 
@@ -83,9 +96,19 @@ export async function GET(req: NextRequest) {
 
     if (notify === "true") {
       try {
-        await reconcileMercadoPagoOrder(result);
+        const reconciled = await reconcileMercadoPagoOrder(result, {
+          preferenceIdHint: preference_id,
+        });
+        if (!reconciled?.ok) {
+          await sendMercadoPagoFallbackAdminEmail(result, {
+            preferenceIdHint: preference_id,
+          });
+        }
       } catch (reconcileError) {
         console.error("/api/mp/verify reconcile error", reconcileError);
+        await sendMercadoPagoFallbackAdminEmail(result, {
+          preferenceIdHint: preference_id,
+        });
       }
     }
 

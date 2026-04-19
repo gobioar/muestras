@@ -31,45 +31,174 @@ type MercadoPagoPayment = {
   id?: string | number;
   status?: string | null;
   external_reference?: string | null;
-  preference_id?: string | null;
+  preference_id?: string | number | null;
+  transaction_amount?: number | null;
+  currency_id?: string | null;
+  payer?: {
+    email?: string | null;
+  } | null;
   metadata?: {
     clientId?: string | null;
-    preference_id?: string | null;
+    preference_id?: string | number | null;
   } | null;
 };
 
-export async function reconcileMercadoPagoOrder(payment: MercadoPagoPayment) {
-  const clientId = payment?.external_reference || payment?.metadata?.clientId || null;
+type ReconcileOptions = {
+  preferenceIdHint?: string | null;
+};
 
-  if (!clientId) {
-    console.error("[MP reconcile] pago sin external_reference/clientId", payment);
-    return { ok: false, reason: "missing-client-id" as const };
-  }
+function uniqueStrings(values: Array<string | number | null | undefined>) {
+  return [...new Set(values.map((value) => String(value || "").trim()).filter(Boolean))];
+}
 
-  const mpStatus = payment?.status || null;
-
-  const { data: order, error: orderError } = await supabase
+async function getOrderByField(field: string, value: string) {
+  const { data: order, error } = await supabase
     .from("sample_orders")
     .select("*")
-    .eq("client_id", clientId)
+    .eq(field, value)
     .maybeSingle();
 
-  if (orderError) {
-    console.error("[MP reconcile] error buscando orden", orderError);
+  if (error) {
+    console.error("[MP reconcile] error buscando orden", { field, value, error });
     throw new Error("Error buscando orden");
   }
 
-  if (!order) {
-    console.error("[MP reconcile] no existe orden para clientId", clientId);
+  return order;
+}
+
+async function findOrderForPayment(payment: MercadoPagoPayment, options?: ReconcileOptions) {
+  const clientIdCandidates = uniqueStrings([
+    payment?.external_reference,
+    payment?.metadata?.clientId,
+  ]);
+
+  for (const clientId of clientIdCandidates) {
+    const order = await getOrderByField("client_id", clientId);
+    if (order) {
+      return { order, clientId, matchType: "client_id" as const };
+    }
+  }
+
+  const preferenceIdCandidates = uniqueStrings([
+    payment?.preference_id,
+    payment?.metadata?.preference_id,
+    options?.preferenceIdHint,
+  ]);
+
+  for (const preferenceId of preferenceIdCandidates) {
+    const order = await getOrderByField("mp_preference_id", preferenceId);
+    if (order) {
+      return {
+        order,
+        clientId: order.client_id,
+        preferenceId,
+        matchType: "mp_preference_id" as const,
+      };
+    }
+  }
+
+  const paymentIdCandidates = uniqueStrings([payment?.id]);
+
+  for (const paymentId of paymentIdCandidates) {
+    const order = await getOrderByField("mp_payment_id", paymentId);
+    if (order) {
+      return {
+        order,
+        clientId: order.client_id,
+        paymentId,
+        matchType: "mp_payment_id" as const,
+      };
+    }
+  }
+
+  return null;
+}
+
+export async function sendMercadoPagoFallbackAdminEmail(
+  payment: MercadoPagoPayment,
+  options?: ReconcileOptions
+) {
+  try {
+    if (String(process.env.SAMPLES_DRY_RUN || "false") === "true") return;
+    if (payment?.status !== "approved") return;
+
+    const transporter = buildTransporter();
+    await transporter.verify();
+
+    const adminTo = process.env.SAMPLES_TO_EMAIL || "hola@gobio.ar";
+    const from = process.env.SMTP_FROM || process.env.SMTP_USER || "no-reply@gobio.ar";
+    const preferenceId =
+      options?.preferenceIdHint || payment?.preference_id || payment?.metadata?.preference_id || "-";
+    const clientId = payment?.external_reference || payment?.metadata?.clientId || "-";
+    const payerEmail = payment?.payer?.email || "-";
+    const amount =
+      payment?.transaction_amount != null
+        ? `${payment.transaction_amount} ${payment.currency_id || ""}`.trim()
+        : "-";
+
+    const subject = `Pago aprobado - Mercado Pago (sin orden vinculada)`;
+    const text =
+      `Se aprobo un pago por Mercado Pago pero no se pudo vincular automaticamente a sample_orders.\n\n` +
+      `payment_id: ${payment?.id || "-"}\n` +
+      `preference_id: ${preferenceId}\n` +
+      `client_id/external_reference: ${clientId}\n` +
+      `monto: ${amount}\n` +
+      `payer: ${payerEmail}\n` +
+      `estado: ${payment?.status || "-"}\n`;
+
+    const html = `
+      <div style="font-family:Montserrat,Arial,sans-serif;color:#363636;line-height:1.5">
+        <h2 style="margin:0 0 12px;font-weight:700;color:#32AA93">Pago aprobado - Mercado Pago</h2>
+        <p style="margin:0 0 16px">
+          No se pudo vincular automaticamente este pago con una orden en <code>sample_orders</code>.
+        </p>
+        <ul style="margin:0;padding-left:18px">
+          <li><strong>payment_id:</strong> ${payment?.id || "-"}</li>
+          <li><strong>preference_id:</strong> ${preferenceId}</li>
+          <li><strong>client_id / external_reference:</strong> ${clientId}</li>
+          <li><strong>monto:</strong> ${amount}</li>
+          <li><strong>payer:</strong> ${payerEmail}</li>
+          <li><strong>estado:</strong> ${payment?.status || "-"}</li>
+        </ul>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from,
+      to: adminTo,
+      subject,
+      text,
+      html,
+    });
+  } catch (error) {
+    console.warn("[MP fallback] admin email warning", (error as any)?.message || error);
+  }
+}
+
+export async function reconcileMercadoPagoOrder(payment: MercadoPagoPayment, options?: ReconcileOptions) {
+  const found = await findOrderForPayment(payment, options);
+
+  if (!found) {
+    console.error("[MP reconcile] no se pudo vincular orden", {
+      paymentId: payment?.id || null,
+      external_reference: payment?.external_reference || null,
+      metadataClientId: payment?.metadata?.clientId || null,
+      preference_id: payment?.preference_id || payment?.metadata?.preference_id || options?.preferenceIdHint || null,
+    });
     return { ok: false, reason: "order-not-found" as const };
   }
+
+  const { order, clientId } = found;
+
+  const mpStatus = payment?.status || null;
+  const preferenceId =
+    options?.preferenceIdHint || payment?.preference_id || payment?.metadata?.preference_id || order.mp_preference_id;
 
   const { error: baseUpdateError } = await supabase
     .from("sample_orders")
     .update({
       mp_payment_id: payment?.id ? String(payment.id) : order.mp_payment_id,
-      mp_preference_id:
-        payment?.metadata?.preference_id || payment?.preference_id || order.mp_preference_id,
+      mp_preference_id: preferenceId ? String(preferenceId) : order.mp_preference_id,
       mp_status: mpStatus,
       status: mpStatus === "approved" ? "paid_confirmed" : "pending_payment",
     })

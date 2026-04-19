@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { reconcileMercadoPagoOrder } from "@/lib/mercadopago-order";
+import {
+  reconcileMercadoPagoOrder,
+  sendMercadoPagoFallbackAdminEmail,
+} from "@/lib/mercadopago-order";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -80,7 +83,10 @@ export async function POST(req: NextRequest) {
     }
 
     const payment = await getMercadoPagoPayment(paymentId);
-    await reconcileMercadoPagoOrder(payment);
+    const reconciled = await reconcileMercadoPagoOrder(payment);
+    if (!reconciled?.ok) {
+      await sendMercadoPagoFallbackAdminEmail(payment);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err: any) {
