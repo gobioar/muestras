@@ -2,21 +2,50 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
+
+type VerifiedPayment = {
+  ok?: boolean;
+  status?: string;
+  status_detail?: string;
+  payment_id?: string;
+  preference_id?: string;
+  transaction_amount?: number;
+};
+
+type CheckoutPayload = {
+  clientId?: string;
+  shippingFee?: number | null;
+  form: {
+    nombreApellido: string;
+    telefono: string;
+    email: string;
+    direccion: string;
+    localidad: string;
+    codigoPostal: string;
+    provincia: string;
+    empresa: string;
+    dniCuit: string;
+    comentarios: string;
+  };
+  cart: Array<{
+    id: string;
+    name: string;
+    category: string;
+    qty: number;
+  }>;
+};
 
 export default function MPReturnResult() {
   const sp = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [verified, setVerified] = useState<{
-    ok?: boolean;
-    status?: string;
-    status_detail?: string;
-    payment_id?: string;
-    preference_id?: string;
-    transaction_amount?: number;
-  } | null>(null);
+  const [verified, setVerified] = useState<VerifiedPayment | null>(null);
+  const [finalizing, setFinalizing] = useState(false);
+  const [finalized, setFinalized] = useState(false);
+  const [finalizeError, setFinalizeError] = useState<string | null>(null);
 
   const params = useMemo(() => {
     return {
@@ -35,17 +64,16 @@ export default function MPReturnResult() {
     const verify = async () => {
       setLoading(true);
       setError(null);
+
       try {
         if (!params.payment_id && !params.preference_id) {
           setVerified({ ok: false, status: params.status || "unknown" });
-          setLoading(false);
           return;
         }
 
         const url = new URL("/api/mp/verify", window.location.origin);
         if (params.payment_id) url.searchParams.set("payment_id", params.payment_id);
         if (params.preference_id) url.searchParams.set("preference_id", params.preference_id);
-        url.searchParams.set("notify", "true");
 
         const res = await fetch(url.toString(), { cache: "no-store" });
         if (!res.ok) {
@@ -55,15 +83,96 @@ export default function MPReturnResult() {
 
         const data = await res.json();
         setVerified(data);
-      } catch (e: any) {
-        setError(e.message || "Error inesperado");
+      } catch (verifyError: any) {
+        setError(verifyError?.message || "Error inesperado");
       } finally {
         setLoading(false);
       }
     };
 
-    verify();
+    void verify();
   }, [params.payment_id, params.preference_id, params.status]);
+
+  useEffect(() => {
+    const finalizeApprovedOrder = async () => {
+      const approvedStatus = (verified?.status || params.status || "").toLowerCase();
+      if (approvedStatus !== "approved") return;
+
+      const finalizationKey =
+        verified?.payment_id || params.payment_id || verified?.preference_id || params.preference_id;
+      if (!finalizationKey) return;
+
+      const storageKey = `gobio.mp.finalized.${finalizationKey}`;
+
+      try {
+        if (localStorage.getItem(storageKey) === "true") {
+          setFinalized(true);
+          return;
+        }
+      } catch {}
+
+      try {
+        setFinalizing(true);
+        setFinalizeError(null);
+
+        const raw = localStorage.getItem("gobio.checkout");
+        if (!raw) {
+          throw new Error("No encontramos los datos del pedido para enviar la confirmacion.");
+        }
+
+        const payload = JSON.parse(raw) as CheckoutPayload;
+        const products = (payload.cart || []).map((item) => ({
+          product: `${item.category} - ${item.name}`,
+          quantity: String(item.qty),
+        }));
+
+        const res = await fetch("/api/samples", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...payload.form,
+            comentarios: payload.form.comentarios,
+            shippingFee: payload.shippingFee ?? undefined,
+            paymentMethod: "mp",
+            mpPreferenceId: verified?.preference_id || params.preference_id || undefined,
+            mpPaymentId: verified?.payment_id || params.payment_id || undefined,
+            mpStatus: verified?.status || params.status || "approved",
+            products,
+            clientId: payload.clientId,
+            consent: true,
+            notifyUser: true,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.details || data?.error || "No se pudo enviar la confirmacion del pedido.");
+        }
+
+        try {
+          localStorage.setItem(storageKey, "true");
+          localStorage.removeItem("gobio.checkout");
+        } catch {}
+
+        setFinalized(true);
+      } catch (finalizeErr: any) {
+        setFinalizeError(
+          finalizeErr?.message || "No se pudo completar la confirmacion del pedido."
+        );
+      } finally {
+        setFinalizing(false);
+      }
+    };
+
+    void finalizeApprovedOrder();
+  }, [
+    params.payment_id,
+    params.preference_id,
+    params.status,
+    verified?.payment_id,
+    verified?.preference_id,
+    verified?.status,
+  ]);
 
   const StatusBadge = ({ status }: { status?: string }) => {
     const norm = (status || "").toLowerCase();
@@ -78,10 +187,7 @@ export default function MPReturnResult() {
               ? "bg-emerald-100 text-emerald-700"
               : "bg-rose-100 text-rose-700";
 
-    const label =
-      norm === "submitted"
-        ? "solicitud recibida"
-        : norm || "desconocido";
+    const label = norm === "submitted" ? "solicitud recibida" : norm || "desconocido";
 
     return (
       <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${color}`}>
@@ -90,11 +196,13 @@ export default function MPReturnResult() {
     );
   };
 
+  const isApproved = (verified?.status || params.status || "").toLowerCase() === "approved";
+
   return (
     <div className="rounded-2xl border border-[color:var(--gb-border-soft)] bg-white p-6">
       {loading && (
         <p className="text-sm text-muted-foreground">
-          {isTransferFlow ? "Procesando solicitud…" : "Verificando pago…"}
+          {isTransferFlow ? "Procesando solicitud..." : "Verificando pago..."}
         </p>
       )}
 
@@ -121,16 +229,16 @@ export default function MPReturnResult() {
 
           <div className="rounded-lg border border-[color:var(--gb-border-soft)] bg-[rgba(50,170,147,.08)] p-4">
             <p className="text-sm text-[color:var(--gb-neutral-800)]">
-              Si la transferencia fue realizada correctamente, no tenés que hacer nada más.
-              Dentro de los próximos <strong>2 a 5 días hábiles</strong> vas a recibir tu
+              Si la transferencia fue realizada correctamente, no tenes que hacer nada mas.
+              Dentro de los proximos <strong>2 a 5 dias habiles</strong> vas a recibir tu
               caja de muestras.
             </p>
           </div>
 
           <div className="rounded-lg border border-[color:var(--gb-border-soft)] bg-[#FAFAFA] p-4">
             <p className="text-sm text-[color:var(--gb-neutral-800)]">
-              Si la transferencia no fue realizada correctamente o hubo algún inconveniente con el pago,
-              la solicitud de muestras será desestimada. En ese caso, no nos comunicaremos para continuar el proceso.
+              Si la transferencia no fue realizada correctamente o hubo algun inconveniente con el pago,
+              la solicitud de muestras sera desestimada. En ese caso, no nos comunicaremos para continuar el proceso.
             </p>
           </div>
 
@@ -174,17 +282,29 @@ export default function MPReturnResult() {
             )}
           </ul>
 
-          {(verified?.status || params.status)?.toLowerCase() === "approved" ? (
+          {isApproved ? (
             <div className="rounded-lg border border-[color:var(--gb-border-soft)] bg-[rgba(50,170,147,.08)] p-4">
               <p className="text-sm text-[color:var(--gb-neutral-800)]">
-                ¡Gracias! Su pago fue aprobado. Prepararemos el despacho
-                (2 a 5 días hábiles).
+                Gracias. Tu pago fue aprobado. Prepararemos el despacho (2 a 5 dias habiles).
               </p>
+              {finalizing && (
+                <p className="mt-3 text-sm text-[color:var(--gb-neutral-800)]">
+                  Estamos enviando la confirmacion y el resumen del pedido por mail...
+                </p>
+              )}
+              {finalized && !finalizing && !finalizeError && (
+                <p className="mt-3 text-sm text-[color:var(--gb-neutral-800)]">
+                  La confirmacion del pedido fue enviada al cliente y a hola@gobio.ar.
+                </p>
+              )}
+              {finalizeError && (
+                <p className="mt-3 text-sm text-destructive">{finalizeError}</p>
+              )}
             </div>
           ) : (
             <div className="rounded-lg border border-[color:var(--gb-border-soft)] bg-[#FAFAFA] p-4">
               <p className="text-sm text-[color:var(--gb-neutral-800)]">
-                Si el pago quedó pendiente o falló, puede reintentarlo.
+                Si el pago quedo pendiente o fallo, puede reintentarlo.
               </p>
             </div>
           )}

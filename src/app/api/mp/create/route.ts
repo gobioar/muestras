@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 import { getShippingFee } from "@/config/shipping";
-import { supabase } from "@/lib/supabase";
+import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     const init_point = data.init_point || data.sandbox_init_point;
     const preference_id = data.id;
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseServer
       .from("sample_orders")
       .update({
         mp_preference_id: preference_id,

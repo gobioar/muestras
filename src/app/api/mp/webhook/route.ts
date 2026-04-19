@@ -83,7 +83,9 @@ export async function POST(req: NextRequest) {
     }
 
     const payment = await getMercadoPagoPayment(paymentId);
-    const reconciled = await reconcileMercadoPagoOrder(payment);
+    const reconciled = await reconcileMercadoPagoOrder(payment, {
+      sendEmails: false,
+    });
     if (!reconciled?.ok) {
       await sendMercadoPagoFallbackAdminEmail(payment);
     }

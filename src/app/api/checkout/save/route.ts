@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { error } = await supabase.from("sample_orders").insert([
+    const { error } = await supabaseServer.from("sample_orders").insert([
       {
         client_id: clientId,
         status: "pending_payment",

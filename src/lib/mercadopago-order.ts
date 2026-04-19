@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-import { supabase } from "@/lib/supabase";
+import { supabaseServer } from "@/lib/supabase-server";
 
 function buildTransporter() {
   const secure =
@@ -45,6 +45,7 @@ type MercadoPagoPayment = {
 
 type ReconcileOptions = {
   preferenceIdHint?: string | null;
+  sendEmails?: boolean;
 };
 
 function uniqueStrings(values: Array<string | number | null | undefined>) {
@@ -52,7 +53,7 @@ function uniqueStrings(values: Array<string | number | null | undefined>) {
 }
 
 async function getOrderByField(field: string, value: string) {
-  const { data: order, error } = await supabase
+  const { data: order, error } = await supabaseServer
     .from("sample_orders")
     .select("*")
     .eq(field, value)
@@ -194,7 +195,7 @@ export async function reconcileMercadoPagoOrder(payment: MercadoPagoPayment, opt
   const preferenceId =
     options?.preferenceIdHint || payment?.preference_id || payment?.metadata?.preference_id || order.mp_preference_id;
 
-  const { error: baseUpdateError } = await supabase
+  const { error: baseUpdateError } = await supabaseServer
     .from("sample_orders")
     .update({
       mp_payment_id: payment?.id ? String(payment.id) : order.mp_payment_id,
@@ -211,6 +212,10 @@ export async function reconcileMercadoPagoOrder(payment: MercadoPagoPayment, opt
 
   if (mpStatus !== "approved") {
     return { ok: true, approved: false, clientId };
+  }
+
+  if (options?.sendEmails === false) {
+    return { ok: true, approved: true, processed: false, clientId };
   }
 
   if (order.processed_at) {
@@ -341,7 +346,7 @@ export async function reconcileMercadoPagoOrder(payment: MercadoPagoPayment, opt
     });
   }
 
-  const { error: processedError } = await supabase
+  const { error: processedError } = await supabaseServer
     .from("sample_orders")
     .update({
       processed_at: new Date().toISOString(),
