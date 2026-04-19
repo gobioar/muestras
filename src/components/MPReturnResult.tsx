@@ -14,38 +14,12 @@ type VerifiedPayment = {
   transaction_amount?: number;
 };
 
-type CheckoutPayload = {
-  clientId?: string;
-  shippingFee?: number | null;
-  form: {
-    nombreApellido: string;
-    telefono: string;
-    email: string;
-    direccion: string;
-    localidad: string;
-    codigoPostal: string;
-    provincia: string;
-    empresa: string;
-    dniCuit: string;
-    comentarios: string;
-  };
-  cart: Array<{
-    id: string;
-    name: string;
-    category: string;
-    qty: number;
-  }>;
-};
-
 export default function MPReturnResult() {
   const sp = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [verified, setVerified] = useState<VerifiedPayment | null>(null);
-  const [finalizing, setFinalizing] = useState(false);
-  const [finalized, setFinalized] = useState(false);
-  const [finalizeError, setFinalizeError] = useState<string | null>(null);
 
   const params = useMemo(() => {
     return {
@@ -92,87 +66,6 @@ export default function MPReturnResult() {
 
     void verify();
   }, [params.payment_id, params.preference_id, params.status]);
-
-  useEffect(() => {
-    const finalizeApprovedOrder = async () => {
-      const approvedStatus = (verified?.status || params.status || "").toLowerCase();
-      if (approvedStatus !== "approved") return;
-
-      const finalizationKey =
-        verified?.payment_id || params.payment_id || verified?.preference_id || params.preference_id;
-      if (!finalizationKey) return;
-
-      const storageKey = `gobio.mp.finalized.${finalizationKey}`;
-
-      try {
-        if (localStorage.getItem(storageKey) === "true") {
-          setFinalized(true);
-          return;
-        }
-      } catch {}
-
-      try {
-        setFinalizing(true);
-        setFinalizeError(null);
-
-        const raw = localStorage.getItem("gobio.checkout");
-        if (!raw) {
-          throw new Error("No encontramos los datos del pedido para enviar la confirmacion.");
-        }
-
-        const payload = JSON.parse(raw) as CheckoutPayload;
-        const products = (payload.cart || []).map((item) => ({
-          product: `${item.category} - ${item.name}`,
-          quantity: String(item.qty),
-        }));
-
-        const res = await fetch("/api/samples", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...payload.form,
-            comentarios: payload.form.comentarios,
-            shippingFee: payload.shippingFee ?? undefined,
-            paymentMethod: "mp",
-            mpPreferenceId: verified?.preference_id || params.preference_id || undefined,
-            mpPaymentId: verified?.payment_id || params.payment_id || undefined,
-            mpStatus: verified?.status || params.status || "approved",
-            products,
-            clientId: payload.clientId,
-            consent: true,
-            notifyUser: true,
-          }),
-        });
-
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data?.details || data?.error || "No se pudo enviar la confirmacion del pedido.");
-        }
-
-        try {
-          localStorage.setItem(storageKey, "true");
-          localStorage.removeItem("gobio.checkout");
-        } catch {}
-
-        setFinalized(true);
-      } catch (finalizeErr: any) {
-        setFinalizeError(
-          finalizeErr?.message || "No se pudo completar la confirmacion del pedido."
-        );
-      } finally {
-        setFinalizing(false);
-      }
-    };
-
-    void finalizeApprovedOrder();
-  }, [
-    params.payment_id,
-    params.preference_id,
-    params.status,
-    verified?.payment_id,
-    verified?.preference_id,
-    verified?.status,
-  ]);
 
   const StatusBadge = ({ status }: { status?: string }) => {
     const norm = (status || "").toLowerCase();
@@ -287,19 +180,9 @@ export default function MPReturnResult() {
               <p className="text-sm text-[color:var(--gb-neutral-800)]">
                 Gracias. Tu pago fue aprobado. Prepararemos el despacho (2 a 5 dias habiles).
               </p>
-              {finalizing && (
-                <p className="mt-3 text-sm text-[color:var(--gb-neutral-800)]">
-                  Estamos enviando la confirmacion y el resumen del pedido por mail...
-                </p>
-              )}
-              {finalized && !finalizing && !finalizeError && (
-                <p className="mt-3 text-sm text-[color:var(--gb-neutral-800)]">
-                  La confirmacion del pedido fue enviada al cliente y a hola@gobio.ar.
-                </p>
-              )}
-              {finalizeError && (
-                <p className="mt-3 text-sm text-destructive">{finalizeError}</p>
-              )}
+              <p className="mt-3 text-sm text-[color:var(--gb-neutral-800)]">
+                La confirmacion por correo y el resumen del pedido se envian automaticamente desde nuestro sistema, incluso si no volves a esta pagina.
+              </p>
             </div>
           ) : (
             <div className="rounded-lg border border-[color:var(--gb-border-soft)] bg-[#FAFAFA] p-4">
