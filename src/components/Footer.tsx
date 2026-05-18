@@ -29,7 +29,7 @@ export const Footer = () => {
                   href="https://wa.me/5491150073269"
                   className="hover:underline"
                 >
-                  +54 11 2787 1523
+                  +54 11 5007 3269
                 </a>
               </li>
               <li className="text-muted-foreground">© 2021 GoBio</li>
