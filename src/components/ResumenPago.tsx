@@ -369,14 +369,14 @@ export const ResumenPago = () => {
                   o WhatsApp:{" "}
                   <a
                     className="underline"
-                    href="https://wa.me/5491127871523"
+                    href="https://wa.me/5491150073269"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    wa.me/5491127871523
+                    wa.me/5491150073269
                   </a>
                   <a
-                    href="https://wa.me/5491127871523"
+                    href="https://wa.me/5491150073269"
                     aria-label="Abrir WhatsApp"
                     target="_blank"
                     rel="noopener noreferrer"

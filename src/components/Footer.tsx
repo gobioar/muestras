@@ -26,7 +26,7 @@ export const Footer = () => {
               </li>
               <li>
                 <a
-                  href="https://wa.me/5491127871523"
+                  href="https://wa.me/5491150073269"
                   className="hover:underline"
                 >
                   +54 11 2787 1523

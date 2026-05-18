@@ -256,7 +256,7 @@ export async function POST(req: NextRequest) {
           <li>Esperá la entrega de tus muestras en los próximos días.</li>
           <li>Probá los envases biodegradables en tu operación.</li>
           <li>Solicitá un presupuesto con descuento al 
-            <a href="https://wa.me/5491127871523" style="color:#32AA93; text-decoration:none">
+            <a href="https://wa.me/5491150073269" style="color:#32AA93; text-decoration:none">
               +54 9 11 2787 1523
             </a>
           </li>
