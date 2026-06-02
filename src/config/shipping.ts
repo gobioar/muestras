@@ -1,32 +1,32 @@
-// Configurable tabla de costos de envío por provincia (ARS)
-// Editá los valores según tus tarifas. 0 son placeholders.
-// Usado tanto en el cliente (UI) como en el servidor (emails/cálculo seguro).
+// Configurable tabla de costos de envio por provincia (ARS)
+// Edita los valores segun tus tarifas. 0 son placeholders.
+// Usado tanto en el cliente (UI) como en el servidor (emails/calculo seguro).
 export const SHIPPING_FEES: Record<string, number> = {
-  "CABA": 4869,
+  "CABA": 4868,
   "GBA Gran Buenos Aires": 8338,
   "Buenos Aires Interior": 15846,
-  "Catamarca": 18910,
-  "Chaco": 18910,
-  "Chubut": 21087,
-  "Córdoba": 14788,
-  "Corrientes": 18910,
-  "Entre Ríos": 15533,
-  "Formosa": 18910,
-  "Jujuy": 18910,
-  "La Pampa": 15533,
-  "La Rioja": 18910,
-  "Mendoza": 15533,
-  "Misiones": 18910,
-  "Neuquén": 18910,
-  "Río Negro": 21087,
-  "Salta": 18910,
-  "San Juan": 15533,
-  "San Luis": 15533,
-  "Santa Cruz": 21087,
-  "Santa Fe": 14788,
-  "Santiago del Estero": 18910,
-  "Tierra del Fuego": 41278,
-  "Tucumán": 15533,
+  "Catamarca": 19968,
+  "Chaco": 19968,
+  "Chubut": 22145,
+  "Córdoba": 15846,
+  "Corrientes": 19968,
+  "Entre Ríos": 16591,
+  "Formosa": 19968,
+  "Jujuy": 19968,
+  "La Pampa": 16591,
+  "La Rioja": 19968,
+  "Mendoza": 16591,
+  "Misiones": 19968,
+  "Neuquén": 19968,
+  "Río Negro": 22145,
+  "Salta": 19968,
+  "San Juan": 16591,
+  "San Luis": 16591,
+  "Santa Cruz": 22145,
+  "Santa Fe": 15846,
+  "Santiago del Estero": 19968,
+  "Tierra del Fuego": 42336,
+  "Tucumán": 16591,
 };
 
 export function getShippingFee(provincia?: string): number | null {
