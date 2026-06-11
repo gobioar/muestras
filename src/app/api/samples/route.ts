@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 import nodemailer from "nodemailer";
 import { getShippingFee } from "@/config/shipping";
+import { validateSampleCart } from "@/lib/sample-cart";
 
 function generateServerId() {
   const rnd = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -70,6 +71,16 @@ export async function POST(req: NextRequest) {
       }
     });
 
+    const cartValidation = validateSampleCart(
+      Array.isArray(products)
+        ? products.map((p: any) => ({
+            product: p?.product,
+            quantity: p?.quantity,
+          }))
+        : []
+    );
+    if (!cartValidation.ok) errors.products = cartValidation.error;
+
     if (!consent) errors.consent = "Debe aceptar el consentimiento.";
 
     if (Object.keys(errors).length > 0) {
@@ -125,7 +136,7 @@ export async function POST(req: NextRequest) {
 
     const productLines = (products || [])
       .filter((p: any) => p && (p.product || p.quantity))
-      .map((p: any, i: number) => `- Producto ${i + 1}: ${p.product || "(sin seleccionar)"} | Cantidad: ${p.quantity || "-"}`)
+      .map((p: any, i: number) => `- Producto ${i + 1}: ${p.product || "(sin seleccionar)"}${p.sku ? ` [SKU: ${p.sku}]` : ""} | Cantidad: ${p.quantity || "-"}`)
       .join("\n");
 
     const paymentLines = (() => {
@@ -169,7 +180,7 @@ export async function POST(req: NextRequest) {
     // NEW: HTML versions (admin + user)
     const productLinesHtml = (products || [])
       .filter((p: any) => p && (p.product || p.quantity))
-      .map((p: any, i: number) => `<li><strong>Producto ${i + 1}:</strong> ${p.product || "(sin seleccionar)"} <span style="color:#667387">• Cantidad:</span> ${p.quantity || "-"}</li>`) 
+      .map((p: any, i: number) => `<li><strong>Producto ${i + 1}:</strong> ${p.product || "(sin seleccionar)"}${p.sku ? ` <span style="color:#667387;font-family:monospace;font-size:12px">[${p.sku}]</span>` : ""} <span style="color:#667387">• Cantidad:</span> ${p.quantity || "-"}</li>`)
       .join("");
 
     const adminHtml = `

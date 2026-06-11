@@ -258,7 +258,8 @@ export async function reconcileMercadoPagoOrder(payment: MercadoPagoPayment, opt
               const qty = p?.qty ?? p?.quantity ?? "-";
               const name = p?.name || p?.product || "Producto";
               const category = p?.category ? `${p.category} - ` : "";
-              return `- Producto ${i + 1}: ${category}${name} | Cantidad: ${qty}`;
+              const sku = p?.sku ? ` [SKU: ${p.sku}]` : "";
+              return `- Producto ${i + 1}: ${category}${name}${sku} | Cantidad: ${qty}`;
             })
             .join("\n")
         : "(sin productos)";
@@ -270,7 +271,8 @@ export async function reconcileMercadoPagoOrder(payment: MercadoPagoPayment, opt
               const qty = p?.qty ?? p?.quantity ?? "-";
               const name = p?.name || p?.product || "Producto";
               const category = p?.category ? `${p.category} - ` : "";
-              return `<li><strong>Producto ${i + 1}:</strong> ${category}${name} <span style="color:#667387">- Cantidad:</span> ${qty}</li>`;
+              const skuHtml = p?.sku ? ` <span style="color:#667387;font-family:monospace;font-size:12px">[${p.sku}]</span>` : "";
+              return `<li><strong>Producto ${i + 1}:</strong> ${category}${name}${skuHtml} <span style="color:#667387">- Cantidad:</span> ${qty}</li>`;
             })
             .join("")
         : "<li>(sin productos)</li>";

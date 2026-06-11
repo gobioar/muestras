@@ -8,10 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { getShippingFee } from "@/config/shipping";
 import { BANK_INFO } from "@/config/payments";
+import { SKUS } from "@/config/skus";
+import { MAX_SAMPLE_UNITS_PER_ITEM, MAX_SAMPLE_UNITS_TOTAL, validateSampleCart } from "@/lib/sample-cart";
 
 type Category = "Accesorios" | "Bandejas" | "Bowls" | "Cubiertos" | "Estuches" | "Platos" | "Vasos";
 
-type StoredCartItem = { id: string; name: string; category: Category; qty: number };
+type StoredCartItem = { id: string; name: string; category: Category; qty: number; sku?: string };
 
 type StoredForm = {
   nombreApellido: string;
@@ -84,8 +86,9 @@ export const ResumenPago = () => {
     setServerError("No se pudo calcular el costo de envío.");
     return;
   }
-  if (totalUnits <= 0) {
-    setServerError("Seleccione al menos un producto.");
+  const cartValidation = validateSampleCart(payload.cart);
+  if (!cartValidation.ok) {
+    setServerError(cartValidation.error);
     return;
   }
 
@@ -170,8 +173,9 @@ export const ResumenPago = () => {
       setServerError("Seleccione un método de pago.");
       return;
     }
-    if (totalUnits <= 0) {
-      setServerError("Seleccione al menos un producto.");
+    const cartValidation = validateSampleCart(payload.cart);
+    if (!cartValidation.ok) {
+      setServerError(cartValidation.error);
       return;
     }
 
@@ -181,6 +185,7 @@ export const ResumenPago = () => {
       const products = payload.cart.map((it) => ({
         product: `${it.category} - ${it.name}`,
         quantity: String(it.qty),
+        sku: it.sku || SKUS[it.id] || "",
       }));
 
       const res = await fetch("/api/samples", {
@@ -265,6 +270,7 @@ export const ResumenPago = () => {
               <li>CP: {payload.form.codigoPostal || "-"}</li>
               <li>Provincia: {payload.form.provincia || "-"}</li>
               <li>Unidades en carrito: {totalUnits}</li>
+              <li>Regla de muestras: máximo {MAX_SAMPLE_UNITS_TOTAL} total y {MAX_SAMPLE_UNITS_PER_ITEM} por item</li>
             </ul>
 
             <div className="mt-3 pt-3 border-t flex items-center justify-between">

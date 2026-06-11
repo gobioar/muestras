@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { Plus, Minus, Trash2, Package, Truck, User } from "lucide-react";
 import { getShippingFee } from "@/config/shipping";
+import { SKUS } from "@/config/skus";
+import { MAX_SAMPLE_UNITS_PER_ITEM, MAX_SAMPLE_UNITS_TOTAL } from "@/lib/sample-cart";
 import { useRouter } from "next/navigation";
 
 type ProductSelection = {
@@ -272,8 +274,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   Vasos: "Vasos",
 };
 
-const MAX_UNITS = 30;
-
 export default function GoBioSampleForm() {
   const [form, setForm] = useState({
     nombreApellido: "",
@@ -347,7 +347,8 @@ export default function GoBioSampleForm() {
     setCart((c) => {
       const current = c[item.id]?.qty || 0;
       const currentTotal = Object.values(c).reduce((sum, it) => sum + it.qty, 0);
-      if (currentTotal >= MAX_UNITS) return c;
+      if (currentTotal >= MAX_SAMPLE_UNITS_TOTAL) return c;
+      if (current >= MAX_SAMPLE_UNITS_PER_ITEM) return c;
       return { ...c, [item.id]: { id: item.id, name: item.name, category: item.category, qty: current + 1 } };
     });
   };
@@ -387,7 +388,10 @@ export default function GoBioSampleForm() {
     if (!form.dniCuit.trim()) e.dniCuit = "Campo obligatorio.";
 
     if (totalUnits <= 0) e.productCart = "Seleccione al menos un producto.";
-    if (totalUnits > MAX_UNITS) e.productCart = "Máximo 30 unidades de muestra.";
+    if (totalUnits > MAX_SAMPLE_UNITS_TOTAL) e.productCart = "Máximo 30 unidades de muestra en total.";
+
+    const invalidItem = Object.values(cart).find((it) => it.qty > MAX_SAMPLE_UNITS_PER_ITEM);
+    if (invalidItem) e.productCart = `Máximo ${MAX_SAMPLE_UNITS_PER_ITEM} unidades por item (${invalidItem.name}).`;
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -412,6 +416,7 @@ export default function GoBioSampleForm() {
       name: it.name,
       category: it.category,
       qty: it.qty,
+      sku: SKUS[it.id] || "",
     }));
 
     const payload = {
@@ -648,7 +653,7 @@ export default function GoBioSampleForm() {
                           size="icon"
                           className="h-10 w-10 rounded-full text-white bg-[linear-gradient(135deg,#32AA93_0%,#7CBF81_100%)] hover:brightness-[1.05] focus-visible:ring-2 focus-visible:ring-[color:var(--gb-primary)] focus-visible:ring-offset-2 transition-transform duration-150 ease-out hover:-translate-y-px"
                           onClick={() => inc(item)}
-                          disabled={totalUnits >= MAX_UNITS}
+                          disabled={totalUnits >= MAX_SAMPLE_UNITS_TOTAL || qty >= MAX_SAMPLE_UNITS_PER_ITEM}
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
@@ -693,7 +698,7 @@ export default function GoBioSampleForm() {
                                 variant="outline"
                                 className="h-9 w-9 rounded-full focus-visible:ring-2 focus-visible:ring-[color:var(--gb-primary)] focus-visible:ring-offset-2"
                                 onClick={() => inc(asCatalog)}
-                                disabled={totalUnits >= MAX_UNITS}
+                                disabled={totalUnits >= MAX_SAMPLE_UNITS_TOTAL || it.qty >= MAX_SAMPLE_UNITS_PER_ITEM}
                               >
                                 <Plus className="h-4 w-4" />
                               </Button>
@@ -713,7 +718,7 @@ export default function GoBioSampleForm() {
                     </ul>
                   )}
                   <div className="mt-4 pt-3 border-t flex items-center justify-between">
-                    <span className="text-sm">Total de unidades (máximo 30)</span>
+                    <span className="text-sm">Total de unidades (máximo 30, hasta 5 por item)</span>
                     <span className="text-sm font-semibold tabular-nums">{totalUnits}</span>
                   </div>
                 </div>

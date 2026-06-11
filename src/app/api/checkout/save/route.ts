@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
+import { validateSampleCart } from "@/lib/sample-cart";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,6 +11,14 @@ export async function POST(req: NextRequest) {
     if (!clientId) {
       return NextResponse.json(
         { error: "clientId requerido" },
+        { status: 400 }
+      );
+    }
+
+    const cartValidation = validateSampleCart(Array.isArray(cart) ? cart : []);
+    if (!cartValidation.ok) {
+      return NextResponse.json(
+        { error: cartValidation.error },
         { status: 400 }
       );
     }

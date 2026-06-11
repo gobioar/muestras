@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { getShippingFee } from "@/config/shipping";
 import { supabaseServer } from "@/lib/supabase-server";
+import { validateSampleCart } from "@/lib/sample-cart";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,14 @@ export async function POST(req: NextRequest) {
     if (!provincia || !clientId) {
       return NextResponse.json(
         { error: "Faltan datos: provincia y clientId son obligatorios" },
+        { status: 400 }
+      );
+    }
+
+    const cartValidation = validateSampleCart(Array.isArray(cart) ? cart : []);
+    if (!cartValidation.ok) {
+      return NextResponse.json(
+        { error: cartValidation.error },
         { status: 400 }
       );
     }
