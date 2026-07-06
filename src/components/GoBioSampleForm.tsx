@@ -146,8 +146,6 @@ const CATALOG: CatalogItem[] = [
   { id: "est-600-rect", name: "Estuche 600 Rectangular", category: "Estuches" },
   { id: "est-500-cuadrado", name: "Estuche 500 Cuadrado", category: "Estuches" },
   { id: "est-papas-12x8x6-kraft", name: "Estuche Papas Fritas 12x8x6cm", category: "Estuches" },
-  { id: "est-hamb-grande-14x14x9-kraft", name: "Estuche Hamburguesa Grande 14x14x9cm", category: "Estuches" },
-  { id: "est-hamb-chico-9x8x7-kraft", name: "Estuche Hamburguesa Chico 9x8x7cm", category: "Estuches" },
   { id: "est-sandwich-21x11x8-kraft", name: "Estuche Sandwich 21x11x8cm", category: "Estuches" },
 
   // Platos
@@ -239,8 +237,6 @@ const MATERIALS: Record<string, string> = {
   "Estuche 600 Rectangular": "Bagazo de Caña de Azúcar",
   "Estuche 500 Cuadrado": "Bagazo de Caña de Azúcar",
   "Estuche Papas Fritas 12x8x6cm": "Papel Kraft",
-  "Estuche Hamburguesa Grande 14x14x9cm": "Papel Kraft",
-  "Estuche Hamburguesa Chico 9x8x7cm": "Papel Kraft",
   "Estuche Sandwich 21x11x8cm": "Papel Kraft",
   // Platos
   "Plato 17cm": "Bagazo de Caña de Azúcar",

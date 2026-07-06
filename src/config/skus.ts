@@ -53,8 +53,6 @@ export const SKUS: Record<string, string> = {
   "est-600-rect": "LZ-GO-B004",
   "est-500-cuadrado": "LZ-GO-T-HB06",
   "est-papas-12x8x6-kraft": "0543-01-03",
-  "est-hamb-grande-14x14x9-kraft": "0541-01-01",
-  "est-hamb-chico-9x8x7-kraft": "0542-01-01",
   "est-sandwich-21x11x8-kraft": "0024-01-01",
 
   // Platos
