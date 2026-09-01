@@ -56,8 +56,10 @@ export const SKUS: Record<string, string> = {
   "est-sandwich-21x11x8-kraft": "0024-01-01",
 
   // Platos
-  "pla-17cm-bagazo": "LZ-GO-YP08",
-  "pla-22cm-bagazo": "LZ-GO-YP09",
+  "pla-17cm-bagazo-natural": "ZP-P7",
+  "pla-17cm-bagazo-blanco": "LZ-GO-YP07",
+  "pla-22cm-bagazo-natural": "ZP-P9",
+  "pla-22cm-bagazo-blanco": "LZ-GO-YP09",
   "pla-18cm-kraft-natural": "PCHL-0001",
   "pla-18cm-kraft-blanco": "PCHL-0002",
   "pla-23cm-kraft-natural": "PGRL-0001",

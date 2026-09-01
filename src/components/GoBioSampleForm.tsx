@@ -149,8 +149,10 @@ const CATALOG: CatalogItem[] = [
   { id: "est-sandwich-21x11x8-kraft", name: "Estuche Sandwich 21x11x8cm", category: "Estuches" },
 
   // Platos
-  { id: "pla-17cm-bagazo", name: "Plato 17cm", category: "Platos" },
-  { id: "pla-22cm-bagazo", name: "Plato 22cm", category: "Platos" },
+  { id: "pla-17cm-bagazo-natural", name: "Plato 17cm Natural", category: "Platos" },
+  { id: "pla-17cm-bagazo-blanco", name: "Plato 17cm Blanco", category: "Platos" },
+  { id: "pla-22cm-bagazo-natural", name: "Plato 22cm Natural", category: "Platos" },
+  { id: "pla-22cm-bagazo-blanco", name: "Plato 22cm Blanco", category: "Platos" },
   { id: "pla-18cm-kraft-natural", name: "Plato 18cm Natural", category: "Platos" },
   { id: "pla-18cm-kraft-blanco", name: "Plato 18cm Blanco", category: "Platos" },
   { id: "pla-23cm-kraft-natural", name: "Plato 23cm Natural", category: "Platos" },
@@ -239,8 +241,10 @@ const MATERIALS: Record<string, string> = {
   "Estuche Papas Fritas 12x8x6cm": "Papel Kraft",
   "Estuche Sandwich 21x11x8cm": "Papel Kraft",
   // Platos
-  "Plato 17cm": "Bagazo de Caña de Azúcar",
-  "Plato 22cm": "Bagazo de Caña de Azúcar",
+  "Plato 17cm Natural": "Bagazo de Caña de Azúcar",
+  "Plato 17cm Blanco": "Bagazo de Caña de Azúcar",
+  "Plato 22cm Natural": "Bagazo de Caña de Azúcar",
+  "Plato 22cm Blanco": "Bagazo de Caña de Azúcar",
   "Plato 18cm Natural": "Papel Kraft",
   "Plato 18cm Blanco": "Papel Kraft",
   "Plato 23cm Natural": "Papel Kraft",
