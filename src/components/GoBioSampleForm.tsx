@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Minus, Trash2, Package, Truck, User } from "lucide-react";
+import { Plus, Minus, Trash2, Package, Truck, User, Search, X } from "lucide-react";
 import { getShippingFee } from "@/config/shipping";
 import { SKUS } from "@/config/skus";
 import { MAX_SAMPLE_UNITS_PER_ITEM, MAX_SAMPLE_UNITS_TOTAL } from "@/lib/sample-cart";
@@ -48,6 +48,8 @@ type CatalogItem = {
   id: string;
   name: string;
   category: Category;
+  // Subtítulo para separar tipos dentro de una misma categoría
+  group?: string;
 };
 
 // Miniatura con fallback y prioridad opcional
@@ -118,20 +120,16 @@ const CATALOG: CatalogItem[] = [
   { id: "ban-tapa-850", name: "Tapa Bandeja 850", category: "Bandejas" },
   { id: "ban-102-300ml-14x11x3-fibra", name: "Bandeja 102 (300ml / 14x11x3cm)", category: "Bandejas" },
   { id: "ban-tapa-102-pet", name: "Tapa Bandeja 102", category: "Bandejas" },
-  { id: "ban-103-550ml-18x12x3-fibra", name: "Bandeja 103 (550ml / 18x12x3cm)", category: "Bandejas" },
-  { id: "ban-tapa-103-pet", name: "Tapa Bandeja 103", category: "Bandejas" },
-  { id: "ban-105-900ml-18x15x4-fibra", name: "Bandeja 105 (900ml / 18x15x4cm)", category: "Bandejas" },
-  { id: "ban-tapa-105-pet", name: "Tapa Bandeja 105", category: "Bandejas" },
+  { id: "ban-103-550ml-18x12x3-fibra", name: "Bandeja 103 Baja (550ml / 18x12x3cm)", category: "Bandejas" },
+  { id: "ban-tapa-103-pet", name: "Tapa Bandeja 103 Baja", category: "Bandejas" },
+  { id: "ban-105-900ml-18x15x4-fibra", name: "Bandeja 105 Baja (900ml / 18x15x4cm)", category: "Bandejas" },
+  { id: "ban-tapa-105-pet", name: "Tapa Bandeja 105 Baja", category: "Bandejas" },
   { id: "ban-105-ovalada-750ml-22x14x4-fibra", name: "Bandeja 105 Ovalada (750ml / 22x14x4cm)", category: "Bandejas" },
   { id: "ban-tapa-ovalada-pet", name: "Tapa Bandeja Ovalada", category: "Bandejas" },
   { id: "ban-103-alta-650ml-16x12x5-fibra", name: "Bandeja 103 Alta (650ml / 16x12x5cm)", category: "Bandejas" },
   { id: "ban-tapa-103-alta-pet", name: "Tapa Bandeja 103 Alta", category: "Bandejas" },
   { id: "ban-105-alta-1100ml-23x15x4-fibra", name: "Bandeja 105 Alta (1100ml / 23x15x4cm)", category: "Bandejas" },
   { id: "ban-tapa-105-alta-pet", name: "Tapa Bandeja 105 Alta", category: "Bandejas" },
-  { id: "ban-n1-12x9", name: "Bandeja N1 12x9cm", category: "Bandejas" },
-  { id: "ban-n2-16x13", name: "Bandeja N2 16x13cm", category: "Bandejas" },
-  { id: "ban-n3-18x14", name: "Bandeja N3 18x14cm", category: "Bandejas" },
-  { id: "ban-n4-20x17", name: "Bandeja N4 20x17cm", category: "Bandejas" },
 
   // Bowls
   { id: "bow-1000-blanco", name: "Bowl 1000", category: "Bowls" },
@@ -146,12 +144,10 @@ const CATALOG: CatalogItem[] = [
   { id: "bow-tapa-dip-2oz", name: "Tapa Dip 2oz", category: "Bowls" },
   { id: "bow-1000-fibra", name: "Bowl 1000 Natural", category: "Bowls" },
   { id: "bow-tapa-1000-fibra", name: "Tapa Bowl 1000 Transparente", category: "Bowls" },
-  { id: "bow-500-fibra", name: "Bowl 500 Natural", category: "Bowls" },
-  { id: "bow-tapa-500-fibra", name: "Tapa Bowl 500 Transparente", category: "Bowls" },
   { id: "bow-850-fibra", name: "Bowl 850 Natural", category: "Bowls" },
   { id: "bow-tapa-850-fibra", name: "Tapa Bowl 850 Transparente", category: "Bowls" },
-  { id: "bow-cono-grande-16x9x4-papas", name: "Cono Grande 16x9x4cm (Papas Fritas)", category: "Bowls" },
-  { id: "bow-cono-chico-14x9x4-papas", name: "Cono Chico 14x9x4cm (Papas Fritas)", category: "Bowls" },
+  { id: "bow-500-fibra", name: "Bowl 500 Natural", category: "Bowls" },
+  { id: "bow-tapa-500-fibra", name: "Tapa Bowl 500 Transparente", category: "Bowls" },
 
   // Cubiertos
   { id: "cub-cuchillo-madera-16cm", name: "Cuchillo 16cm", category: "Cubiertos" },
@@ -164,18 +160,12 @@ const CATALOG: CatalogItem[] = [
   { id: "est-950-bajo", name: "Estuche 950 Bajo", category: "Estuches" },
   { id: "est-600-rect", name: "Estuche 600 Rectangular", category: "Estuches" },
   { id: "est-500-cuadrado", name: "Estuche 500 Cuadrado", category: "Estuches" },
-  { id: "est-papas-12x8x6-kraft", name: "Estuche Papas Fritas 12x8x6cm", category: "Estuches" },
-  { id: "est-sandwich-21x11x8-kraft", name: "Estuche Sandwich 21x11x8cm", category: "Estuches" },
 
   // Platos
   { id: "pla-17cm-bagazo-natural", name: "Plato 17cm Natural", category: "Platos" },
   { id: "pla-17cm-bagazo-blanco", name: "Plato 17cm Blanco", category: "Platos" },
   { id: "pla-22cm-bagazo-natural", name: "Plato 22cm Natural", category: "Platos" },
   { id: "pla-22cm-bagazo-blanco", name: "Plato 22cm Blanco", category: "Platos" },
-  { id: "pla-18cm-kraft-natural", name: "Plato 18cm Natural", category: "Platos" },
-  { id: "pla-18cm-kraft-blanco", name: "Plato 18cm Blanco", category: "Platos" },
-  { id: "pla-23cm-kraft-natural", name: "Plato 23cm Natural", category: "Platos" },
-  { id: "pla-23cm-kraft-blanco", name: "Plato 23cm Blanco", category: "Platos" },
 
   // Vasos
   { id: "vaso-8oz", name: "Vaso 8oz (240ml)", category: "Vasos" },
@@ -186,16 +176,25 @@ const CATALOG: CatalogItem[] = [
   { id: "tapa-vaso-14oz", name: "Tapa Vaso 14oz", category: "Vasos" },
   { id: "vaso-4oz", name: "Vaso 4oz (120ml)", category: "Vasos" },
 
-  // Bolsas
-  { id: "bolsa-camiseta-20x30", name: "Bolsa Camiseta 20x30", category: "Bolsas" },
-  { id: "bolsa-camiseta-30x40", name: "Bolsa Camiseta 30x40", category: "Bolsas" },
-  { id: "bolsa-camiseta-40x50", name: "Bolsa Camiseta 40x50", category: "Bolsas" },
-  { id: "bolsa-arranque-20x20", name: "Bolsa de Arranque 20x20", category: "Bolsas" },
-  { id: "bolsa-arranque-20x30", name: "Bolsa de Arranque 20x30", category: "Bolsas" },
-  { id: "bolsa-arranque-30x40", name: "Bolsa de Arranque 30x40", category: "Bolsas" },
-  { id: "bolsa-rinon-20x30", name: "Bolsa Riñón 20x30", category: "Bolsas" },
-  { id: "bolsa-rinon-30x40", name: "Bolsa Riñón 30x40", category: "Bolsas" },
-  { id: "bolsa-rinon-40x50", name: "Bolsa Riñón 40x50", category: "Bolsas" },
+  // Bolsas (cada medida se ofrece sin impresión y con impresión GoBio de referencia)
+  { id: "bolsa-arranque-20x20", name: "Bolsa de Arranque 20x20 (sin impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-20x20-impresa", name: "Bolsa de Arranque 20x20 (con impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-20x30", name: "Bolsa de Arranque 20x30 (sin impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-20x30-impresa", name: "Bolsa de Arranque 20x30 (con impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-30x40", name: "Bolsa de Arranque 30x40 (sin impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-30x40-impresa", name: "Bolsa de Arranque 30x40 (con impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-camiseta-20x30", name: "Bolsa Camiseta 20x30 (sin impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-20x30-impresa", name: "Bolsa Camiseta 20x30 (con impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-30x40", name: "Bolsa Camiseta 30x40 (sin impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-30x40-impresa", name: "Bolsa Camiseta 30x40 (con impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-40x50", name: "Bolsa Camiseta 40x50 (sin impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-40x50-impresa", name: "Bolsa Camiseta 40x50 (con impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-rinon-20x30", name: "Bolsa Riñón 20x30 (sin impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-20x30-impresa", name: "Bolsa Riñón 20x30 (con impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-30x40", name: "Bolsa Riñón 30x40 (sin impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-30x40-impresa", name: "Bolsa Riñón 30x40 (con impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-40x50", name: "Bolsa Riñón 40x50 (sin impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-40x50-impresa", name: "Bolsa Riñón 40x50 (con impresión)", category: "Bolsas", group: "Bolsas riñón" },
 ];
 
 // Mapas de Material por producto (tus claves actuales)
@@ -212,20 +211,16 @@ const MATERIALS: Record<string, string> = {
   "Tapa Bandeja 850": "Bagazo de Caña de Azúcar",
   "Bandeja 102 (300ml / 14x11x3cm)": "Fibra Natural",
   "Tapa Bandeja 102": "PET Cristal",
-  "Bandeja 103 (550ml / 18x12x3cm)": "Fibra Natural",
-  "Tapa Bandeja 103": "PET Cristal",
-  "Bandeja 105 (900ml / 18x15x4cm)": "Fibra Natural",
-  "Tapa Bandeja 105": "PET Cristal",
+  "Bandeja 103 Baja (550ml / 18x12x3cm)": "Fibra Natural",
+  "Tapa Bandeja 103 Baja": "PET Cristal",
+  "Bandeja 105 Baja (900ml / 18x15x4cm)": "Fibra Natural",
+  "Tapa Bandeja 105 Baja": "PET Cristal",
   "Bandeja 105 Ovalada (750ml / 22x14x4cm)": "Fibra Natural",
   "Tapa Bandeja Ovalada": "PET Cristal",
   "Bandeja 103 Alta (650ml / 16x12x5cm)": "Fibra Natural",
   "Tapa Bandeja 103 Alta": "PET Cristal",
   "Bandeja 105 Alta (1100ml / 23x15x4cm)": "Fibra Natural",
   "Tapa Bandeja 105 Alta": "PET Cristal",
-  "Bandeja N1 12x9cm": "Papel Kraft",
-  "Bandeja N2 16x13cm": "Papel Kraft",
-  "Bandeja N3 18x14cm": "Papel Kraft",
-  "Bandeja N4 20x17cm": "Papel Kraft",
   // Vasos
   "Vaso 8oz (240ml)": "Bagazo de Caña de Azúcar",
   "Tapa Vaso 8oz": "Bagazo de Caña de Azúcar",
@@ -251,8 +246,6 @@ const MATERIALS: Record<string, string> = {
   "Tapa Bowl 500 Transparente": "PET Cristal",
   "Bowl 850 Natural": "Fibra Natural",
   "Tapa Bowl 850 Transparente": "PET Cristal",
-  "Cono Grande 16x9x4cm (Papas Fritas)": "Papel Kraft",
-  "Cono Chico 14x9x4cm (Papas Fritas)": "Papel Kraft",
   // Cubiertos
   "Cuchillo 16cm": "Madera de Abedul",
   "Cuchara 16cm": "Madera de Abedul",
@@ -263,29 +256,30 @@ const MATERIALS: Record<string, string> = {
   "Estuche 950 Bajo": "Bagazo de Caña de Azúcar",
   "Estuche 600 Rectangular": "Bagazo de Caña de Azúcar",
   "Estuche 500 Cuadrado": "Bagazo de Caña de Azúcar",
-  "Estuche Papas Fritas 12x8x6cm": "Papel Kraft",
-  "Estuche Sandwich 21x11x8cm": "Papel Kraft",
   // Platos
   "Plato 17cm Natural": "Bagazo de Caña de Azúcar",
   "Plato 17cm Blanco": "Bagazo de Caña de Azúcar",
   "Plato 22cm Natural": "Bagazo de Caña de Azúcar",
   "Plato 22cm Blanco": "Bagazo de Caña de Azúcar",
-  "Plato 18cm Natural": "Papel Kraft",
-  "Plato 18cm Blanco": "Papel Kraft",
-  "Plato 23cm Natural": "Papel Kraft",
-  "Plato 23cm Blanco": "Papel Kraft",
   // bolsas
-  "Bolsa Camiseta 20x30": "Bioplástico",
-  "Bolsa Camiseta 30x40": "Bioplástico",
-  "Bolsa Camiseta 40x50": "Bioplástico",
-
-  "Bolsa de Arranque 20x20": "Bioplástico",
-  "Bolsa de Arranque 20x30": "Bioplástico",
-  "Bolsa de Arranque 30x40": "Bioplástico",
-
-  "Bolsa Riñón 20x30": "Bioplástico",
-  "Bolsa Riñón 30x40": "Bioplástico",
-  "Bolsa Riñón 40x50": "Bioplástico",
+  "Bolsa de Arranque 20x20 (sin impresión)": "Bioplástico",
+  "Bolsa de Arranque 20x20 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa de Arranque 20x30 (sin impresión)": "Bioplástico",
+  "Bolsa de Arranque 20x30 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa de Arranque 30x40 (sin impresión)": "Bioplástico",
+  "Bolsa de Arranque 30x40 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Camiseta 20x30 (sin impresión)": "Bioplástico",
+  "Bolsa Camiseta 20x30 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Camiseta 30x40 (sin impresión)": "Bioplástico",
+  "Bolsa Camiseta 30x40 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Camiseta 40x50 (sin impresión)": "Bioplástico",
+  "Bolsa Camiseta 40x50 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Riñón 20x30 (sin impresión)": "Bioplástico",
+  "Bolsa Riñón 20x30 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Riñón 30x40 (sin impresión)": "Bioplástico",
+  "Bolsa Riñón 30x40 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Riñón 40x50 (sin impresión)": "Bioplástico",
+  "Bolsa Riñón 40x50 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -298,6 +292,29 @@ const CATEGORY_LABELS: Record<string, string> = {
   Platos: "Platos",
   Vasos: "Vasos",
 };
+
+// Búsqueda por palabras: sin tildes ni mayúsculas, y tolera plural/singular
+// ("vasos" encuentra "Vaso 8oz"). Busca en nombre, categoría, subgrupo y material.
+function normalizeText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
+function stemWord(word: string) {
+  return word.length > 3 ? word.replace(/(es|s)$/, "") : word;
+}
+
+function matchesQuery(item: CatalogItem, query: string) {
+  const haystack = normalizeText(
+    [item.name, CATEGORY_LABELS[item.category] ?? item.category, item.group ?? "", MATERIALS[item.name] ?? ""].join(" ")
+  );
+  return normalizeText(query)
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((word) => haystack.includes(word) || haystack.includes(stemWord(word)));
+}
 
 export default function GoBioSampleForm() {
   const [form, setForm] = useState({
@@ -327,6 +344,16 @@ export default function GoBioSampleForm() {
   const [cart, setCart] = useState<
     Record<string, { id: string; name: string; category: Category; qty: number }>
   >({});
+  const [search, setSearch] = useState("");
+  const query = search.trim();
+  const visibleItems = (
+    query ? CATALOG.filter((p) => matchesQuery(p, query)) : CATALOG.filter((p) => p.category === selectedCategory)
+  )
+    .map((item, order) => ({ item, order }))
+    .sort((a, b) =>
+      query ? CATEGORIES.indexOf(a.item.category) - CATEGORIES.indexOf(b.item.category) || a.order - b.order : 0
+    )
+    .map(({ item }) => item);
   const router = useRouter();
 
   // Persistir preferencia de categoría
@@ -628,14 +655,39 @@ export default function GoBioSampleForm() {
 
           <section className="space-y-4">
             <h3 className="text-[22px] leading-[28px] font-semibold text-[color:var(--gb-neutral-800)]">Selección de muestras</h3>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--gb-neutral-600)]" aria-hidden="true" />
+              <Input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar producto (ej.: vasos, tapa, bowl 500, bolsa)"
+                aria-label="Buscar producto"
+                className="pl-9 pr-9"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  aria-label="Borrar búsqueda"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-[color:var(--gb-neutral-600)] hover:bg-[rgba(50,170,147,.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--gb-primary)]"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   type="button"
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => {
+                    setSearch("");
+                    setSelectedCategory(cat);
+                  }}
                   className={`px-3 py-1.5 rounded-full text-sm transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--gb-primary)] focus-visible:ring-offset-2 ${
-                    selectedCategory === cat
+                    !query && selectedCategory === cat
                       ? "bg-[linear-gradient(135deg,#32AA93_0%,#7CBF81_100%)] text-white border-transparent shadow-sm"
                       : "bg-white text-[color:var(--gb-neutral-800)] border-[color:var(--gb-neutral-100)] hover:bg-[rgba(50,170,147,.08)]"
                   }`}
@@ -647,12 +699,29 @@ export default function GoBioSampleForm() {
 
             <div className="grid md:grid-cols-3 gap-6 items-start">
               <div className="md:col-span-2 grid sm:grid-cols-2 gap-3">
-                {CATALOG.filter((p) => p.category === selectedCategory).map((item, idx) => {
+                {query && visibleItems.length === 0 && (
+                  <p className="sm:col-span-2 rounded-xl border border-dashed border-[color:var(--gb-border-soft)] p-4 text-sm text-[color:var(--gb-neutral-600)]">
+                    No encontramos productos para “{query}”. Probá con otra palabra o elegí una categoría.
+                  </p>
+                )}
+                {visibleItems.map((item, idx, list) => {
                   const qty = cart[item.id]?.qty || 0;
-                  const isInitialAboveTheFold = selectedCategory === "Estuches" && idx < 6;
+                  const isInitialAboveTheFold = !query && selectedCategory === "Estuches" && idx < 6;
+                  const startsCategory = !!query && item.category !== list[idx - 1]?.category;
+                  const startsGroup = !!item.group && item.group !== list[idx - 1]?.group;
                   return (
+                    <Fragment key={item.id}>
+                    {startsCategory && (
+                      <h4 className="sm:col-span-2 mt-2 text-lg font-semibold text-[color:var(--gb-neutral-800)]">
+                        {CATEGORY_LABELS[item.category] ?? item.category}
+                      </h4>
+                    )}
+                    {startsGroup && (
+                      <h4 className="sm:col-span-2 mt-2 border-b border-[color:var(--gb-border-soft)] pb-1 text-base font-semibold text-[color:var(--gb-neutral-800)]">
+                        {item.group}
+                      </h4>
+                    )}
                     <div
-                      key={item.id}
                       className="flex items-center justify-between rounded-xl border border-[color:var(--gb-border-soft)] px-3 py-3.5 bg-white transition-all duration-200 ease-out hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-px"
                     >
                       <div className="flex items-center gap-3">
@@ -684,6 +753,7 @@ export default function GoBioSampleForm() {
                         </Button>
                       </div>
                     </div>
+                    </Fragment>
                   );
                 })}
               </div>
@@ -702,7 +772,9 @@ export default function GoBioSampleForm() {
                             <div className="flex items-center gap-3">
                               <ProductThumb id={it.id} alt={it.name} className="h-10 w-10" />
                               <div>
-                                <p className="text-sm font-medium text-[color:var(--gb-neutral-800)]">{it.name}</p>
+                                <p className="text-sm font-medium text-[color:var(--gb-neutral-800)]">
+                                  {it.name}
+                                </p>
                                 <p className="text-xs text-[color:var(--gb-neutral-600)]">{it.category}</p>
                               </div>
                             </div>

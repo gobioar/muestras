@@ -18,10 +18,6 @@ export const SKUS: Record<string, string> = {
   "ban-tapa-105-pet": "09-0058",
   "ban-105-ovalada-750ml-22x14x4-fibra": "01-0002",
   "ban-tapa-ovalada-pet": "09-0023",
-  "ban-n1-12x9": "BFM-001",
-  "ban-n2-16x13": "BFM-002",
-  "ban-n3-18x14": "BFM-003",
-  "ban-n4-20x17": "BFM-005",
 
   // Bowls
   "bow-1000-blanco": "LZ-GO-75W(W)",
@@ -38,8 +34,6 @@ export const SKUS: Record<string, string> = {
   "bow-tapa-1000-fibra": "09-0025",
   "bow-500-fibra": "01-0013",
   "bow-tapa-500-fibra": "09-0024",
-  "bow-cono-grande-16x9x4-papas": "0149-01-01",
-  "bow-cono-chico-14x9x4-papas": "0544-01-02",
 
   // Cubiertos
   "cub-cuchillo-madera-16cm": "WD-101K",
@@ -52,18 +46,12 @@ export const SKUS: Record<string, string> = {
   "est-950-bajo": "TM-B102",
   "est-600-rect": "LZ-GO-B004",
   "est-500-cuadrado": "LZ-GO-T-HB06",
-  "est-papas-12x8x6-kraft": "0543-01-03",
-  "est-sandwich-21x11x8-kraft": "0024-01-01",
 
   // Platos
   "pla-17cm-bagazo-natural": "ZP-P7",
   "pla-17cm-bagazo-blanco": "LZ-GO-YP07",
   "pla-22cm-bagazo-natural": "ZP-P9",
   "pla-22cm-bagazo-blanco": "LZ-GO-YP09",
-  "pla-18cm-kraft-natural": "PCHL-0001",
-  "pla-18cm-kraft-blanco": "PCHL-0002",
-  "pla-23cm-kraft-natural": "PGRL-0001",
-  "pla-23cm-kraft-blanco": "PGRL-0002",
 
   // Vasos
   "vaso-4oz": "LZ-GO-TW04",
@@ -83,4 +71,13 @@ export const SKUS: Record<string, string> = {
   "bolsa-rinon-20x30": "TO-BR30",
   "bolsa-rinon-30x40": "TO-BR40",
   "bolsa-rinon-40x50": "TO-BR50",
+  "bolsa-arranque-20x20-impresa": "TO-BA20L",
+  "bolsa-arranque-20x30-impresa": "TO-BA30L",
+  "bolsa-arranque-30x40-impresa": "TO-BA40L",
+  "bolsa-camiseta-20x30-impresa": "TO-BC30L",
+  "bolsa-camiseta-30x40-impresa": "TO-BC40L",
+  "bolsa-camiseta-40x50-impresa": "TO-BC50L",
+  "bolsa-rinon-20x30-impresa": "TO-BR30L",
+  "bolsa-rinon-30x40-impresa": "TO-BR40L",
+  "bolsa-rinon-40x50-impresa": "TO-BR50L",
 };
