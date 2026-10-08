@@ -46,18 +46,12 @@ export const SKUS: Record<string, string> = {
   "est-950-bajo": "TM-B102",
   "est-600-rect": "LZ-GO-B004",
   "est-500-cuadrado": "LZ-GO-T-HB06",
-  "est-papas-12x8x6-kraft": "0543-01-03",
-  "est-sandwich-21x11x8-kraft": "0024-01-01",
 
   // Platos
   "pla-17cm-bagazo-natural": "ZP-P7",
   "pla-17cm-bagazo-blanco": "LZ-GO-YP07",
   "pla-22cm-bagazo-natural": "ZP-P9",
   "pla-22cm-bagazo-blanco": "LZ-GO-YP09",
-  "pla-18cm-kraft-natural": "PCHL-0001",
-  "pla-18cm-kraft-blanco": "PCHL-0002",
-  "pla-23cm-kraft-natural": "PGRL-0001",
-  "pla-23cm-kraft-blanco": "PGRL-0002",
 
   // Vasos
   "vaso-4oz": "LZ-GO-TW04",

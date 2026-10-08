@@ -167,18 +167,12 @@ const CATALOG: CatalogItem[] = [
   { id: "est-950-bajo", name: "Estuche 950 Bajo", category: "Estuches" },
   { id: "est-600-rect", name: "Estuche 600 Rectangular", category: "Estuches" },
   { id: "est-500-cuadrado", name: "Estuche 500 Cuadrado", category: "Estuches" },
-  { id: "est-papas-12x8x6-kraft", name: "Estuche Papas Fritas 12x8x6cm", category: "Estuches" },
-  { id: "est-sandwich-21x11x8-kraft", name: "Estuche Sandwich 21x11x8cm", category: "Estuches" },
 
   // Platos
   { id: "pla-17cm-bagazo-natural", name: "Plato 17cm Natural", category: "Platos" },
   { id: "pla-17cm-bagazo-blanco", name: "Plato 17cm Blanco", category: "Platos" },
   { id: "pla-22cm-bagazo-natural", name: "Plato 22cm Natural", category: "Platos" },
   { id: "pla-22cm-bagazo-blanco", name: "Plato 22cm Blanco", category: "Platos" },
-  { id: "pla-18cm-kraft-natural", name: "Plato 18cm Natural", category: "Platos" },
-  { id: "pla-18cm-kraft-blanco", name: "Plato 18cm Blanco", category: "Platos" },
-  { id: "pla-23cm-kraft-natural", name: "Plato 23cm Natural", category: "Platos" },
-  { id: "pla-23cm-kraft-blanco", name: "Plato 23cm Blanco", category: "Platos" },
 
   // Vasos
   { id: "vaso-8oz", name: "Vaso 8oz (240ml)", category: "Vasos" },
@@ -260,17 +254,11 @@ const MATERIALS: Record<string, string> = {
   "Estuche 950 Bajo": "Bagazo de Caña de Azúcar",
   "Estuche 600 Rectangular": "Bagazo de Caña de Azúcar",
   "Estuche 500 Cuadrado": "Bagazo de Caña de Azúcar",
-  "Estuche Papas Fritas 12x8x6cm": "Papel Kraft",
-  "Estuche Sandwich 21x11x8cm": "Papel Kraft",
   // Platos
   "Plato 17cm Natural": "Bagazo de Caña de Azúcar",
   "Plato 17cm Blanco": "Bagazo de Caña de Azúcar",
   "Plato 22cm Natural": "Bagazo de Caña de Azúcar",
   "Plato 22cm Blanco": "Bagazo de Caña de Azúcar",
-  "Plato 18cm Natural": "Papel Kraft",
-  "Plato 18cm Blanco": "Papel Kraft",
-  "Plato 23cm Natural": "Papel Kraft",
-  "Plato 23cm Blanco": "Papel Kraft",
   // bolsas
   "Bolsa Camiseta 20x30": "Bioplástico",
   "Bolsa Camiseta 30x40": "Bioplástico",
