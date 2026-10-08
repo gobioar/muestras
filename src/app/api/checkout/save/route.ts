@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { validateSampleCart } from "@/lib/sample-cart";
+import { getShippingFee } from "@/config/shipping";
+
+// Recorta los textos del formulario para no guardar valores arbitrariamente largos
+function clean(value: unknown, max = 500) {
+  if (value == null) return value as null | undefined;
+  return String(value).trim().slice(0, max);
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     const { clientId, form, cart, shippingFee } = body;
 
-    if (!clientId) {
+    if (typeof clientId !== "string" || !clientId || clientId.length > 100) {
       return NextResponse.json(
         { error: "clientId requerido" },
         { status: 400 }
@@ -27,17 +34,17 @@ export async function POST(req: NextRequest) {
       {
         client_id: clientId,
         status: "pending_payment",
-        email: form?.email,
-        nombre_apellido: form?.nombreApellido,
-        telefono: form?.telefono,
-        empresa: form?.empresa,
-        dni_cuit: form?.dniCuit,
-        direccion: form?.direccion,
-        localidad: form?.localidad,
-        codigo_postal: form?.codigoPostal,
-        provincia: form?.provincia,
-        comentarios: form?.comentarios,
-        shipping_fee: shippingFee || 0,
+        email: clean(form?.email),
+        nombre_apellido: clean(form?.nombreApellido),
+        telefono: clean(form?.telefono),
+        empresa: clean(form?.empresa),
+        dni_cuit: clean(form?.dniCuit),
+        direccion: clean(form?.direccion),
+        localidad: clean(form?.localidad),
+        codigo_postal: clean(form?.codigoPostal),
+        provincia: clean(form?.provincia),
+        comentarios: clean(form?.comentarios, 2000),
+        shipping_fee: getShippingFee(form?.provincia) ?? (shippingFee || 0),
         products_json: cart || [],
       },
     ]);

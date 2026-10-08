@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 import nodemailer from "nodemailer";
+import { escapeHtml } from "@/lib/escape-html";
 
 export async function POST(req: NextRequest) {
   try {
@@ -97,30 +98,30 @@ Fecha: ${new Date().toLocaleString("es-AR")}
           Nuevo intento de pago con Mercado Pago
         </h2>
 
-        <p style="margin:0 0 16px">ClientId: <strong>${clientId || "No informado"}</strong></p>
+        <p style="margin:0 0 16px">ClientId: <strong>${escapeHtml(clientId) || "No informado"}</strong></p>
 
         <h3 style="margin:16px 0 8px;color:#363636">Datos del cliente</h3>
         <ul style="margin:0 0 16px;padding-left:18px">
-          <li><strong>Nombre:</strong> ${form?.nombreApellido || "-"}</li>
-          <li><strong>Email:</strong> ${form?.email || "-"}</li>
-          <li><strong>Teléfono:</strong> ${form?.telefono || "-"}</li>
-          <li><strong>Empresa:</strong> ${form?.empresa || "-"}</li>
-          <li><strong>DNI/CUIT:</strong> ${form?.dniCuit || "-"}</li>
+          <li><strong>Nombre:</strong> ${escapeHtml(form?.nombreApellido) || "-"}</li>
+          <li><strong>Email:</strong> ${escapeHtml(form?.email) || "-"}</li>
+          <li><strong>Teléfono:</strong> ${escapeHtml(form?.telefono) || "-"}</li>
+          <li><strong>Empresa:</strong> ${escapeHtml(form?.empresa) || "-"}</li>
+          <li><strong>DNI/CUIT:</strong> ${escapeHtml(form?.dniCuit) || "-"}</li>
         </ul>
 
         <h3 style="margin:16px 0 8px;color:#363636">Dirección</h3>
         <ul style="margin:0 0 16px;padding-left:18px">
-          <li><strong>Dirección:</strong> ${form?.direccion || "-"}</li>
-          <li><strong>Localidad:</strong> ${form?.localidad || "-"}</li>
-          <li><strong>Provincia:</strong> ${form?.provincia || "-"}</li>
-          <li><strong>CP:</strong> ${form?.codigoPostal || "-"}</li>
+          <li><strong>Dirección:</strong> ${escapeHtml(form?.direccion) || "-"}</li>
+          <li><strong>Localidad:</strong> ${escapeHtml(form?.localidad) || "-"}</li>
+          <li><strong>Provincia:</strong> ${escapeHtml(form?.provincia) || "-"}</li>
+          <li><strong>CP:</strong> ${escapeHtml(form?.codigoPostal) || "-"}</li>
         </ul>
 
         <h3 style="margin:16px 0 8px;color:#363636">Productos</h3>
-        <pre style="white-space:pre-wrap;margin:0 0 16px;font-family:inherit">${productsText}</pre>
+        <pre style="white-space:pre-wrap;margin:0 0 16px;font-family:inherit">${escapeHtml(productsText)}</pre>
 
-        <p style="margin:0 0 8px"><strong>Costo de envío:</strong> ${shippingText}</p>
-        <p style="margin:0 0 8px"><strong>Comentarios:</strong> ${form?.comentarios || "-"}</p>
+        <p style="margin:0 0 8px"><strong>Costo de envío:</strong> ${escapeHtml(shippingText)}</p>
+        <p style="margin:0 0 8px"><strong>Comentarios:</strong> ${escapeHtml(form?.comentarios) || "-"}</p>
         <p style="margin:16px 0 0;color:#667387;font-size:12px">Fecha: ${new Date().toLocaleString("es-AR")}</p>
       </div>
     `;

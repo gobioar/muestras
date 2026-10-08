@@ -65,8 +65,6 @@ export async function GET(req: NextRequest) {
         status_detail: data.status_detail,
         transaction_amount: data.transaction_amount,
         currency_id: data.currency_id,
-        payer: { email: data.payer?.email },
-        order: data.order,
         preference_id: data.metadata?.preference_id || data.preference_id,
       });
     }
@@ -119,7 +117,6 @@ export async function GET(req: NextRequest) {
       status_detail: result.status_detail,
       transaction_amount: result.transaction_amount,
       currency_id: result.currency_id,
-      payer: { email: result.payer?.email },
       preference_id: result.preference_id,
     });
   } catch (err: any) {
