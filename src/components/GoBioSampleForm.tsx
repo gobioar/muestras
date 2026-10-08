@@ -13,9 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Minus, Trash2, Package, Truck, User } from "lucide-react";
+import { Plus, Minus, Trash2, Package, Truck, User, Search, X } from "lucide-react";
 import { getShippingFee } from "@/config/shipping";
-import { SKUS } from "@/config/skus";
+import { SKUS, SKUS_IMPRESA } from "@/config/skus";
 import { MAX_SAMPLE_UNITS_PER_ITEM, MAX_SAMPLE_UNITS_TOTAL } from "@/lib/sample-cart";
 import { useRouter } from "next/navigation";
 
@@ -296,6 +296,29 @@ const CATEGORY_LABELS: Record<string, string> = {
   Vasos: "Vasos",
 };
 
+// Búsqueda por palabras: sin tildes ni mayúsculas, y tolera plural/singular
+// ("vasos" encuentra "Vaso 8oz"). Busca en nombre, categoría, subgrupo y material.
+function normalizeText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
+function stemWord(word: string) {
+  return word.length > 3 ? word.replace(/(es|s)$/, "") : word;
+}
+
+function matchesQuery(item: CatalogItem, query: string) {
+  const haystack = normalizeText(
+    [item.name, CATEGORY_LABELS[item.category] ?? item.category, item.group ?? "", MATERIALS[item.name] ?? ""].join(" ")
+  );
+  return normalizeText(query)
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((word) => haystack.includes(word) || haystack.includes(stemWord(word)));
+}
+
 export default function GoBioSampleForm() {
   const [form, setForm] = useState({
     nombreApellido: "",
@@ -325,6 +348,17 @@ export default function GoBioSampleForm() {
     Record<string, { id: string; name: string; category: Category; qty: number }>
   >({});
   const [bagPrint, setBagPrint] = useState<BagPrint>("sin");
+  const [search, setSearch] = useState("");
+  const query = search.trim();
+  const visibleItems = (
+    query ? CATALOG.filter((p) => matchesQuery(p, query)) : CATALOG.filter((p) => p.category === selectedCategory)
+  )
+    .map((item, order) => ({ item, order }))
+    .sort((a, b) =>
+      query ? CATEGORIES.indexOf(a.item.category) - CATEGORIES.indexOf(b.item.category) || a.order - b.order : 0
+    )
+    .map(({ item }) => item);
+  const showBagPrint = visibleItems.some((p) => p.category === "Bolsas");
   const router = useRouter();
 
   // Persistir preferencia de categoría
@@ -440,7 +474,7 @@ export default function GoBioSampleForm() {
       name: it.category === "Bolsas" ? `${it.name} (${BAG_PRINT_LABELS[bagPrint]})` : it.name,
       category: it.category,
       qty: it.qty,
-      sku: SKUS[it.id] || "",
+      sku: (it.category === "Bolsas" && bagPrint === "con" ? SKUS_IMPRESA[it.id] : undefined) || SKUS[it.id] || "",
     }));
 
     const payload = {
@@ -627,14 +661,39 @@ export default function GoBioSampleForm() {
 
           <section className="space-y-4">
             <h3 className="text-[22px] leading-[28px] font-semibold text-[color:var(--gb-neutral-800)]">Selección de muestras</h3>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--gb-neutral-600)]" aria-hidden="true" />
+              <Input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar producto (ej.: vasos, tapa, bowl 500, bolsa)"
+                aria-label="Buscar producto"
+                className="pl-9 pr-9"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  aria-label="Borrar búsqueda"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-[color:var(--gb-neutral-600)] hover:bg-[rgba(50,170,147,.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--gb-primary)]"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   type="button"
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => {
+                    setSearch("");
+                    setSelectedCategory(cat);
+                  }}
                   className={`px-3 py-1.5 rounded-full text-sm transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--gb-primary)] focus-visible:ring-offset-2 ${
-                    selectedCategory === cat
+                    !query && selectedCategory === cat
                       ? "bg-[linear-gradient(135deg,#32AA93_0%,#7CBF81_100%)] text-white border-transparent shadow-sm"
                       : "bg-white text-[color:var(--gb-neutral-800)] border-[color:var(--gb-neutral-100)] hover:bg-[rgba(50,170,147,.08)]"
                   }`}
@@ -646,7 +705,12 @@ export default function GoBioSampleForm() {
 
             <div className="grid md:grid-cols-3 gap-6 items-start">
               <div className="md:col-span-2 grid sm:grid-cols-2 gap-3">
-                {selectedCategory === "Bolsas" && (
+                {query && visibleItems.length === 0 && (
+                  <p className="sm:col-span-2 rounded-xl border border-dashed border-[color:var(--gb-border-soft)] p-4 text-sm text-[color:var(--gb-neutral-600)]">
+                    No encontramos productos para “{query}”. Probá con otra palabra o elegí una categoría.
+                  </p>
+                )}
+                {showBagPrint && (
                   <div className="sm:col-span-2 rounded-xl border border-[color:var(--gb-border-soft)] bg-[rgba(50,170,147,.06)] p-4">
                     <p className="text-sm font-semibold text-[color:var(--gb-neutral-800)]" id="bag-print-label">
                       ¿Querés las bolsas con o sin impresión?
@@ -676,12 +740,18 @@ export default function GoBioSampleForm() {
                     </p>
                   </div>
                 )}
-                {CATALOG.filter((p) => p.category === selectedCategory).map((item, idx, list) => {
+                {visibleItems.map((item, idx, list) => {
                   const qty = cart[item.id]?.qty || 0;
-                  const isInitialAboveTheFold = selectedCategory === "Estuches" && idx < 6;
+                  const isInitialAboveTheFold = !query && selectedCategory === "Estuches" && idx < 6;
+                  const startsCategory = !!query && item.category !== list[idx - 1]?.category;
                   const startsGroup = !!item.group && item.group !== list[idx - 1]?.group;
                   return (
                     <Fragment key={item.id}>
+                    {startsCategory && (
+                      <h4 className="sm:col-span-2 mt-2 text-lg font-semibold text-[color:var(--gb-neutral-800)]">
+                        {CATEGORY_LABELS[item.category] ?? item.category}
+                      </h4>
+                    )}
                     {startsGroup && (
                       <h4 className="sm:col-span-2 mt-2 border-b border-[color:var(--gb-border-soft)] pb-1 text-base font-semibold text-[color:var(--gb-neutral-800)]">
                         {item.group}
