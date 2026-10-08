@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -71,16 +71,29 @@ function ProductThumb({
     `/images/products/${id}/1.png`,
   ];
   const [srcIdx, setSrcIdx] = useState(0);
+  const imgRef = useRef<HTMLImageElement>(null);
   const src =
     srcIdx < candidates.length
       ? candidates[srcIdx]
       : "/images/products/placeholder.svg";
+  const nextCandidate = () =>
+    setSrcIdx((i) => (i < candidates.length ? i + 1 : i));
+
+  // En la primera carga la imagen viene del HTML del servidor y puede fallar
+  // antes de que React registre onError; en ese caso pasamos al siguiente candidato.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth === 0) nextCandidate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
+
   return (
     <img
       key={src} // fuerza remount al cambiar src
+      ref={imgRef}
       src={src}
       alt={alt}
-      onError={() => setSrcIdx((i) => (i < candidates.length ? i + 1 : i))}
+      onError={nextCandidate}
       className={`${className} object-cover rounded-lg border border-[color:var(--gb-border-soft)] bg-[color:var(--gb-bg-soft)]`}
       width={56}
       height={56}
