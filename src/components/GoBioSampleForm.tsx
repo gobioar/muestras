@@ -144,10 +144,10 @@ const CATALOG: CatalogItem[] = [
   { id: "bow-tapa-dip-2oz", name: "Tapa Dip 2oz", category: "Bowls" },
   { id: "bow-1000-fibra", name: "Bowl 1000 Natural", category: "Bowls" },
   { id: "bow-tapa-1000-fibra", name: "Tapa Bowl 1000 Transparente", category: "Bowls" },
-  { id: "bow-500-fibra", name: "Bowl 500 Natural", category: "Bowls" },
-  { id: "bow-tapa-500-fibra", name: "Tapa Bowl 500 Transparente", category: "Bowls" },
   { id: "bow-850-fibra", name: "Bowl 850 Natural", category: "Bowls" },
   { id: "bow-tapa-850-fibra", name: "Tapa Bowl 850 Transparente", category: "Bowls" },
+  { id: "bow-500-fibra", name: "Bowl 500 Natural", category: "Bowls" },
+  { id: "bow-tapa-500-fibra", name: "Tapa Bowl 500 Transparente", category: "Bowls" },
 
   // Cubiertos
   { id: "cub-cuchillo-madera-16cm", name: "Cuchillo 16cm", category: "Cubiertos" },
