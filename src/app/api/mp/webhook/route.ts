@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import {
@@ -67,17 +68,58 @@ function extractPaymentId(body: any, req: NextRequest) {
   return null;
 }
 
+// Valida el header x-signature de Mercado Pago. Solo se aplica si MP_WEBHOOK_SECRET
+// está configurado (Tus integraciones > Webhooks > clave secreta).
+function hasValidSignature(req: NextRequest) {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) return true;
+
+  const signature = req.headers.get("x-signature") || "";
+  const requestId = req.headers.get("x-request-id");
+  const parts = Object.fromEntries(
+    signature.split(",").map((part) => {
+      const [key, ...rest] = part.split("=");
+      return [key?.trim(), rest.join("=").trim()];
+    })
+  );
+  const ts = parts.ts;
+  const v1 = parts.v1;
+  if (!ts || !v1) return false;
+
+  let dataId = req.nextUrl.searchParams.get("data.id");
+  if (dataId && /^[a-z0-9]+$/i.test(dataId)) dataId = dataId.toLowerCase();
+
+  let manifest = "";
+  if (dataId) manifest += `id:${dataId};`;
+  if (requestId) manifest += `request-id:${requestId};`;
+  manifest += `ts:${ts};`;
+
+  const expected = createHmac("sha256", secret).update(manifest).digest("hex");
+  const a = Buffer.from(expected);
+  const b = Buffer.from(v1);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 export async function POST(req: NextRequest) {
   try {
+    if (!hasValidSignature(req)) {
+      console.warn("[MP webhook] firma invalida", { query: req.nextUrl.search });
+      return NextResponse.json({ error: "Firma invalida" }, { status: 401 });
+    }
+
     const body = await req.json().catch(() => ({}));
-    console.log("[MP webhook] body:", body);
+    console.log("[MP webhook] notificacion", {
+      type: body?.type || body?.topic || null,
+      action: body?.action || null,
+      dataId: body?.data?.id || null,
+    });
 
     const paymentId = extractPaymentId(body, req);
 
     if (!paymentId) {
       console.warn("[MP webhook] notificacion sin paymentId util", {
         query: req.nextUrl.search,
-        body,
+        type: body?.type || body?.topic || null,
       });
       return NextResponse.json({ ok: true });
     }

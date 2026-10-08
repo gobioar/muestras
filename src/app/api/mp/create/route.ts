@@ -26,18 +26,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // El monto se calcula siempre en el servidor; amountOverride del cliente se ignora
     const feeByProv = getShippingFee(provincia);
-    if (feeByProv == null && typeof amountOverride !== "number") {
+    if (feeByProv == null) {
       return NextResponse.json(
         { error: "No se pudo determinar el monto del envío" },
         { status: 400 }
       );
     }
 
-    const validatedAmount =
-      typeof amountOverride === "number" && amountOverride >= 0
-        ? amountOverride
-        : feeByProv || 0;
+    if (typeof amountOverride === "number" && amountOverride !== feeByProv) {
+      console.warn("[MP] amountOverride distinto al costo de envío del servidor", {
+        clientId,
+        provincia,
+        amountOverride,
+        feeByProv,
+      });
+    }
+
+    const validatedAmount = feeByProv;
 
     const accessToken = process.env.MP_ACCESS_TOKEN;
 
@@ -123,13 +130,12 @@ export async function POST(req: NextRequest) {
     console.info("[ORDER] iniciado", {
       ts: new Date().toISOString(),
       clientId,
-      email,
       provincia,
       amount: validatedAmount,
       method: "MP",
       preference_id,
       status: "iniciado",
-      cart,
+      units: cartValidation.totalUnits,
     });
 
     return NextResponse.json({

@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import nodemailer from "nodemailer";
 import { getShippingFee } from "@/config/shipping";
 import { validateSampleCart } from "@/lib/sample-cart";
+import { escapeHtml } from "@/lib/escape-html";
 
 function generateServerId() {
   const rnd = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
 
     // Cálculo seguro del costo de envío en el servidor
     const serverShippingFee = getShippingFee(provincia) ?? null;
-    const shippingFeeToUse = typeof clientShippingFee === "number" && clientShippingFee >= 0 ? clientShippingFee : (serverShippingFee ?? 0);
+    const shippingFeeToUse = serverShippingFee ?? (typeof clientShippingFee === "number" && clientShippingFee >= 0 ? clientShippingFee : 0);
 
     // Asunto incluye provincia (requisito)
     const subject = `Solicitud de muestras – ${nombreApellido} – ${provincia || localidad || ""}`.trim();
@@ -177,46 +178,63 @@ export async function POST(req: NextRequest) {
 
     const userAutoText = `Recibimos su solicitud de muestras. N.º de referencia: ${id}. Contacto: hola@gobio.ar.`;
 
+    // Valores escapados para insertar en el HTML de los mails
+    const h = {
+      id: escapeHtml(id),
+      nombreApellido: escapeHtml(nombreApellido),
+      empresa: escapeHtml(empresa),
+      dniCuit: escapeHtml(dniCuit),
+      telefono: escapeHtml(telefono),
+      email: escapeHtml(email),
+      direccion: escapeHtml(direccion),
+      localidad: escapeHtml(localidad),
+      provincia: escapeHtml(provincia),
+      codigoPostal: escapeHtml(codigoPostal),
+      comentarios: escapeHtml(comentarios),
+      whatsappTime: escapeHtml(whatsappTime),
+      paymentLines: escapeHtml(paymentLines),
+    };
+
     // NEW: HTML versions (admin + user)
     const productLinesHtml = (products || [])
       .filter((p: any) => p && (p.product || p.quantity))
-      .map((p: any, i: number) => `<li><strong>Producto ${i + 1}:</strong> ${p.product || "(sin seleccionar)"}${p.sku ? ` <span style="color:#667387;font-family:monospace;font-size:12px">[${p.sku}]</span>` : ""} <span style="color:#667387">• Cantidad:</span> ${p.quantity || "-"}</li>`)
+      .map((p: any, i: number) => `<li><strong>Producto ${i + 1}:</strong> ${escapeHtml(p.product) || "(sin seleccionar)"}${p.sku ? ` <span style="color:#667387;font-family:monospace;font-size:12px">[${escapeHtml(p.sku)}]</span>` : ""} <span style="color:#667387">• Cantidad:</span> ${escapeHtml(p.quantity) || "-"}</li>`)
       .join("");
 
     const adminHtml = `
       <div style="font-family:Montserrat,Arial,sans-serif; color:#363636; line-height:1.5">
         <h2 style="margin:0 0 12px; font-weight:700; color:#32AA93">Nueva solicitud de muestras</h2>
-        <p style="margin:0 0 16px">ID: <strong>${id}</strong></p>
+        <p style="margin:0 0 16px">ID: <strong>${h.id}</strong></p>
 
         <h3 style="margin:16px 0 8px; color:#363636">Datos de contacto</h3>
         <ul style="margin:0 0 16px; padding-left:18px">
-          <li><strong>Nombre y apellido:</strong> ${nombreApellido}</li>
-          <li><strong>Empresa:</strong> ${empresa || "-"}</li>
-          <li><strong>DNI / CUIT:</strong> ${dniCuit || "-"}</li>
-          <li><strong>Teléfono:</strong> ${telefono}</li>
-          <li><strong>Correo:</strong> ${email}</li>
+          <li><strong>Nombre y apellido:</strong> ${h.nombreApellido}</li>
+          <li><strong>Empresa:</strong> ${h.empresa || "-"}</li>
+          <li><strong>DNI / CUIT:</strong> ${h.dniCuit || "-"}</li>
+          <li><strong>Teléfono:</strong> ${h.telefono}</li>
+          <li><strong>Correo:</strong> ${h.email}</li>
         </ul>
 
         <h3 style="margin:16px 0 8px; color:#363636">Dirección de entrega</h3>
         <ul style="margin:0 0 16px; padding-left:18px">
-          <li><strong>Dirección:</strong> ${direccion}</li>
-          <li><strong>Localidad:</strong> ${localidad}</li>
-          <li><strong>Provincia:</strong> ${provincia}</li>
-          <li><strong>Código postal:</strong> ${codigoPostal}</li>
+          <li><strong>Dirección:</strong> ${h.direccion}</li>
+          <li><strong>Localidad:</strong> ${h.localidad}</li>
+          <li><strong>Provincia:</strong> ${h.provincia}</li>
+          <li><strong>Código postal:</strong> ${h.codigoPostal}</li>
         </ul>
 
         <h3 style="margin:16px 0 8px; color:#363636">Selección de muestras</h3>
         <ul style="margin:0 0 16px; padding-left:18px">${productLinesHtml || "<li>(sin productos)</li>"}</ul>
 
         <p style="margin:0 0 8px"><strong>Costo de envío aplicado:</strong> $ ${new Intl.NumberFormat("es-AR").format(shippingFeeToUse)}</p>
-        <p style="white-space:pre-wrap; margin:0 0 16px">${paymentLines}</p>
+        <p style="white-space:pre-wrap; margin:0 0 16px">${h.paymentLines}</p>
 
-        <p style="margin:0 0 16px"><strong>Comentarios:</strong> ${comentarios || "-"}</p>
+        <p style="margin:0 0 16px"><strong>Comentarios:</strong> ${h.comentarios || "-"}</p>
 
         <h3 style="margin:16px 0 8px; color:#363636">Preferencias de contacto</h3>
         <ul style="margin:0 0 16px; padding-left:18px">
           <li><strong>WhatsApp:</strong> ${whatsappPreferred ? "Sí" : "No"}</li>
-          <li><strong>Franja horaria:</strong> ${whatsappTime || "-"}</li>
+          <li><strong>Franja horaria:</strong> ${h.whatsappTime || "-"}</li>
         </ul>
 
         <p style="margin:24px 0 0; font-size:12px; color:#667387">Consentimiento: ${consent ? "Aceptado" : "No"}</p>
@@ -230,7 +248,7 @@ export async function POST(req: NextRequest) {
       <p style="margin:6px 0 0; opacity:0.95">Recibimos tu solicitud de muestras</p>
     </div>
     <div style="border:1px solid #E6EBF2; border-top:none; border-radius:0 0 14px 14px; padding:20px; background:#ffffff">
-      <p style="margin:0 0 12px">Referencia: <strong>${id}</strong></p>
+      <p style="margin:0 0 12px">Referencia: <strong>${h.id}</strong></p>
       <p style="margin:0 0 16px">
         Tu solicitud fue procesada correctamente. Dentro de los próximos 
         <strong>2 a 5 días hábiles</strong> vas a recibir la caja de muestras en la dirección indicada.
@@ -241,25 +259,25 @@ export async function POST(req: NextRequest) {
 
       <h3 style="margin:0 0 8px; color:#363636">Tus datos</h3>
       <ul style="margin:0 0 16px; padding-left:18px; color:#363636">
-        <li><strong>Nombre y apellido:</strong> ${nombreApellido}</li>
-        <li><strong>Empresa:</strong> ${empresa || "-"}</li>
-        <li><strong>DNI / CUIT:</strong> ${dniCuit || "-"}</li>
-        <li><strong>Teléfono:</strong> ${telefono}</li>
-        <li><strong>Correo:</strong> ${email}</li>
+        <li><strong>Nombre y apellido:</strong> ${h.nombreApellido}</li>
+        <li><strong>Empresa:</strong> ${h.empresa || "-"}</li>
+        <li><strong>DNI / CUIT:</strong> ${h.dniCuit || "-"}</li>
+        <li><strong>Teléfono:</strong> ${h.telefono}</li>
+        <li><strong>Correo:</strong> ${h.email}</li>
       </ul>
 
       <h3 style="margin:0 0 8px; color:#363636">Dirección de entrega</h3>
       <ul style="margin:0 0 16px; padding-left:18px; color:#363636">
-        <li><strong>Dirección:</strong> ${direccion}</li>
-        <li><strong>Localidad:</strong> ${localidad}</li>
-        <li><strong>Provincia:</strong> ${provincia}</li>
-        <li><strong>Código postal:</strong> ${codigoPostal}</li>
+        <li><strong>Dirección:</strong> ${h.direccion}</li>
+        <li><strong>Localidad:</strong> ${h.localidad}</li>
+        <li><strong>Provincia:</strong> ${h.provincia}</li>
+        <li><strong>Código postal:</strong> ${h.codigoPostal}</li>
       </ul>
 
       <h3 style="margin:0 0 8px; color:#363636">Productos solicitados</h3>
       <ul style="margin:0 0 16px; padding-left:18px; color:#363636">${productLinesHtml || "<li>(sin productos)</li>"}</ul>
       <p style="margin:0 0 16px"><strong>Costo de envío estimado:</strong> $ ${new Intl.NumberFormat("es-AR").format(shippingFeeToUse)}</p>
-      ${comentarios ? `<p style="margin:0 0 16px"><strong>Comentarios:</strong> ${comentarios}</p>` : ""}
+      ${h.comentarios ? `<p style="margin:0 0 16px"><strong>Comentarios:</strong> ${h.comentarios}</p>` : ""}
 
       <div style="margin:20px 0; padding:14px; background:#FAFAFA; border:1px solid #E6EBF2; border-radius:12px; color:#363636">
         <p style="margin:0 0 6px"><strong>Próximos pasos</strong></p>
@@ -268,7 +286,7 @@ export async function POST(req: NextRequest) {
           <li>Probá los envases biodegradables en tu operación.</li>
           <li>Solicitá un presupuesto con descuento al 
             <a href="https://wa.me/5491150073269" style="color:#32AA93; text-decoration:none">
-              +54 9 11 2787 1523
+              +54 9 11 5007 3269
             </a>
           </li>
         </ol>
@@ -331,9 +349,9 @@ export async function POST(req: NextRequest) {
           html: `
             <div style="font-family:Montserrat,Arial,sans-serif;color:#363636;line-height:1.5">
               <h2 style="margin:0 0 12px;font-weight:700;color:#32AA93">Pago recibido – Transferencia bancaria</h2>
-              <p style="margin:0 0 12px">Referencia: <strong>${id}</strong></p>
+              <p style="margin:0 0 12px">Referencia: <strong>${h.id}</strong></p>
               <p style="margin:0 0 4px">
-                ${transferReceipt?.name ? `Comprobante adjunto: <strong>${transferReceipt.name}</strong>` : "Sin comprobante adjunto"}
+                ${transferReceipt?.name ? `Comprobante adjunto: <strong>${escapeHtml(transferReceipt.name)}</strong>` : "Sin comprobante adjunto"}
               </p>
             </div>
           `,
