@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Minus, Trash2, Package, Truck, User, Search, X } from "lucide-react";
 import { getShippingFee } from "@/config/shipping";
-import { SKUS, SKUS_IMPRESA } from "@/config/skus";
+import { SKUS } from "@/config/skus";
 import { MAX_SAMPLE_UNITS_PER_ITEM, MAX_SAMPLE_UNITS_TOTAL } from "@/lib/sample-cart";
 import { useRouter } from "next/navigation";
 
@@ -50,13 +50,6 @@ type CatalogItem = {
   category: Category;
   // Subtítulo para separar tipos dentro de una misma categoría
   group?: string;
-};
-
-type BagPrint = "sin" | "con";
-
-const BAG_PRINT_LABELS: Record<BagPrint, string> = {
-  sin: "sin impresión",
-  con: "con impresión",
 };
 
 // Miniatura con fallback y prioridad opcional
@@ -183,16 +176,25 @@ const CATALOG: CatalogItem[] = [
   { id: "tapa-vaso-14oz", name: "Tapa Vaso 14oz", category: "Vasos" },
   { id: "vaso-4oz", name: "Vaso 4oz (120ml)", category: "Vasos" },
 
-  // Bolsas
-  { id: "bolsa-arranque-20x20", name: "Bolsa de Arranque 20x20", category: "Bolsas", group: "Bolsas de arranque" },
-  { id: "bolsa-arranque-20x30", name: "Bolsa de Arranque 20x30", category: "Bolsas", group: "Bolsas de arranque" },
-  { id: "bolsa-arranque-30x40", name: "Bolsa de Arranque 30x40", category: "Bolsas", group: "Bolsas de arranque" },
-  { id: "bolsa-camiseta-20x30", name: "Bolsa Camiseta 20x30", category: "Bolsas", group: "Bolsas camiseta" },
-  { id: "bolsa-camiseta-30x40", name: "Bolsa Camiseta 30x40", category: "Bolsas", group: "Bolsas camiseta" },
-  { id: "bolsa-camiseta-40x50", name: "Bolsa Camiseta 40x50", category: "Bolsas", group: "Bolsas camiseta" },
-  { id: "bolsa-rinon-20x30", name: "Bolsa Riñón 20x30", category: "Bolsas", group: "Bolsas riñón" },
-  { id: "bolsa-rinon-30x40", name: "Bolsa Riñón 30x40", category: "Bolsas", group: "Bolsas riñón" },
-  { id: "bolsa-rinon-40x50", name: "Bolsa Riñón 40x50", category: "Bolsas", group: "Bolsas riñón" },
+  // Bolsas (cada medida se ofrece sin impresión y con impresión GoBio de referencia)
+  { id: "bolsa-arranque-20x20", name: "Bolsa de Arranque 20x20 (sin impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-20x20-impresa", name: "Bolsa de Arranque 20x20 (con impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-20x30", name: "Bolsa de Arranque 20x30 (sin impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-20x30-impresa", name: "Bolsa de Arranque 20x30 (con impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-30x40", name: "Bolsa de Arranque 30x40 (sin impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-30x40-impresa", name: "Bolsa de Arranque 30x40 (con impresión)", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-camiseta-20x30", name: "Bolsa Camiseta 20x30 (sin impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-20x30-impresa", name: "Bolsa Camiseta 20x30 (con impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-30x40", name: "Bolsa Camiseta 30x40 (sin impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-30x40-impresa", name: "Bolsa Camiseta 30x40 (con impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-40x50", name: "Bolsa Camiseta 40x50 (sin impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-40x50-impresa", name: "Bolsa Camiseta 40x50 (con impresión)", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-rinon-20x30", name: "Bolsa Riñón 20x30 (sin impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-20x30-impresa", name: "Bolsa Riñón 20x30 (con impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-30x40", name: "Bolsa Riñón 30x40 (sin impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-30x40-impresa", name: "Bolsa Riñón 30x40 (con impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-40x50", name: "Bolsa Riñón 40x50 (sin impresión)", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-40x50-impresa", name: "Bolsa Riñón 40x50 (con impresión)", category: "Bolsas", group: "Bolsas riñón" },
 ];
 
 // Mapas de Material por producto (tus claves actuales)
@@ -260,17 +262,24 @@ const MATERIALS: Record<string, string> = {
   "Plato 22cm Natural": "Bagazo de Caña de Azúcar",
   "Plato 22cm Blanco": "Bagazo de Caña de Azúcar",
   // bolsas
-  "Bolsa Camiseta 20x30": "Bioplástico",
-  "Bolsa Camiseta 30x40": "Bioplástico",
-  "Bolsa Camiseta 40x50": "Bioplástico",
-
-  "Bolsa de Arranque 20x20": "Bioplástico",
-  "Bolsa de Arranque 20x30": "Bioplástico",
-  "Bolsa de Arranque 30x40": "Bioplástico",
-
-  "Bolsa Riñón 20x30": "Bioplástico",
-  "Bolsa Riñón 30x40": "Bioplástico",
-  "Bolsa Riñón 40x50": "Bioplástico",
+  "Bolsa de Arranque 20x20 (sin impresión)": "Bioplástico",
+  "Bolsa de Arranque 20x20 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa de Arranque 20x30 (sin impresión)": "Bioplástico",
+  "Bolsa de Arranque 20x30 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa de Arranque 30x40 (sin impresión)": "Bioplástico",
+  "Bolsa de Arranque 30x40 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Camiseta 20x30 (sin impresión)": "Bioplástico",
+  "Bolsa Camiseta 20x30 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Camiseta 30x40 (sin impresión)": "Bioplástico",
+  "Bolsa Camiseta 30x40 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Camiseta 40x50 (sin impresión)": "Bioplástico",
+  "Bolsa Camiseta 40x50 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Riñón 20x30 (sin impresión)": "Bioplástico",
+  "Bolsa Riñón 20x30 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Riñón 30x40 (sin impresión)": "Bioplástico",
+  "Bolsa Riñón 30x40 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
+  "Bolsa Riñón 40x50 (sin impresión)": "Bioplástico",
+  "Bolsa Riñón 40x50 (con impresión)": "Bioplástico · Impresión GoBio (de referencia)",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -335,7 +344,6 @@ export default function GoBioSampleForm() {
   const [cart, setCart] = useState<
     Record<string, { id: string; name: string; category: Category; qty: number }>
   >({});
-  const [bagPrint, setBagPrint] = useState<BagPrint>("sin");
   const [search, setSearch] = useState("");
   const query = search.trim();
   const visibleItems = (
@@ -346,7 +354,6 @@ export default function GoBioSampleForm() {
       query ? CATEGORIES.indexOf(a.item.category) - CATEGORIES.indexOf(b.item.category) || a.order - b.order : 0
     )
     .map(({ item }) => item);
-  const showBagPrint = visibleItems.some((p) => p.category === "Bolsas");
   const router = useRouter();
 
   // Persistir preferencia de categoría
@@ -458,11 +465,10 @@ export default function GoBioSampleForm() {
     const clientId = generateClientId();
     const cartPayload = Object.values(cart).map((it) => ({
       id: it.id,
-      // En las bolsas el nombre incluye si se piden con o sin impresión
-      name: it.category === "Bolsas" ? `${it.name} (${BAG_PRINT_LABELS[bagPrint]})` : it.name,
+      name: it.name,
       category: it.category,
       qty: it.qty,
-      sku: (it.category === "Bolsas" && bagPrint === "con" ? SKUS_IMPRESA[it.id] : undefined) || SKUS[it.id] || "",
+      sku: SKUS[it.id] || "",
     }));
 
     const payload = {
@@ -698,36 +704,6 @@ export default function GoBioSampleForm() {
                     No encontramos productos para “{query}”. Probá con otra palabra o elegí una categoría.
                   </p>
                 )}
-                {showBagPrint && (
-                  <div className="sm:col-span-2 rounded-xl border border-[color:var(--gb-border-soft)] bg-[rgba(50,170,147,.06)] p-4">
-                    <p className="text-sm font-semibold text-[color:var(--gb-neutral-800)]" id="bag-print-label">
-                      ¿Querés las bolsas con o sin impresión?
-                    </p>
-                    <div role="radiogroup" aria-labelledby="bag-print-label" className="mt-3 flex flex-wrap gap-2">
-                      {(["sin", "con"] as const).map((opt) => (
-                        <button
-                          key={opt}
-                          type="button"
-                          role="radio"
-                          aria-checked={bagPrint === opt}
-                          onClick={() => setBagPrint(opt)}
-                          className={`px-3 py-1.5 rounded-full text-sm transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--gb-primary)] focus-visible:ring-offset-2 ${
-                            bagPrint === opt
-                              ? "bg-[linear-gradient(135deg,#32AA93_0%,#7CBF81_100%)] text-white border-transparent shadow-sm"
-                              : "bg-white text-[color:var(--gb-neutral-800)] border-[color:var(--gb-neutral-100)] hover:bg-[rgba(50,170,147,.08)]"
-                          }`}
-                        >
-                          {opt === "sin" ? "Sin impresión" : "Con impresión"}
-                        </button>
-                      ))}
-                    </div>
-                    <p className="mt-2 text-xs text-[color:var(--gb-neutral-600)]">
-                      {bagPrint === "con"
-                        ? "Contanos en Comentarios adicionales qué diseño o logo querés imprimir."
-                        : "Se aplica a todas las bolsas que elijas."}
-                    </p>
-                  </div>
-                )}
                 {visibleItems.map((item, idx, list) => {
                   const qty = cart[item.id]?.qty || 0;
                   const isInitialAboveTheFold = !query && selectedCategory === "Estuches" && idx < 6;
@@ -797,7 +773,7 @@ export default function GoBioSampleForm() {
                               <ProductThumb id={it.id} alt={it.name} className="h-10 w-10" />
                               <div>
                                 <p className="text-sm font-medium text-[color:var(--gb-neutral-800)]">
-                                  {it.category === "Bolsas" ? `${it.name} (${BAG_PRINT_LABELS[bagPrint]})` : it.name}
+                                  {it.name}
                                 </p>
                                 <p className="text-xs text-[color:var(--gb-neutral-600)]">{it.category}</p>
                               </div>

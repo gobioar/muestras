@@ -71,17 +71,13 @@ export const SKUS: Record<string, string> = {
   "bolsa-rinon-20x30": "TO-BR30",
   "bolsa-rinon-30x40": "TO-BR40",
   "bolsa-rinon-40x50": "TO-BR50",
-};
-
-// Código de las bolsas cuando se piden con impresión
-export const SKUS_IMPRESA: Record<string, string> = {
-  "bolsa-arranque-20x20": "TO-BA20L",
-  "bolsa-arranque-20x30": "TO-BA30L",
-  "bolsa-arranque-30x40": "TO-BA40L",
-  "bolsa-camiseta-20x30": "TO-BC30L",
-  "bolsa-camiseta-30x40": "TO-BC40L",
-  "bolsa-camiseta-40x50": "TO-BC50L",
-  "bolsa-rinon-20x30": "TO-BR30L",
-  "bolsa-rinon-30x40": "TO-BR40L",
-  "bolsa-rinon-40x50": "TO-BR50L",
+  "bolsa-arranque-20x20-impresa": "TO-BA20L",
+  "bolsa-arranque-20x30-impresa": "TO-BA30L",
+  "bolsa-arranque-30x40-impresa": "TO-BA40L",
+  "bolsa-camiseta-20x30-impresa": "TO-BC30L",
+  "bolsa-camiseta-30x40-impresa": "TO-BC40L",
+  "bolsa-camiseta-40x50-impresa": "TO-BC50L",
+  "bolsa-rinon-20x30-impresa": "TO-BR30L",
+  "bolsa-rinon-30x40-impresa": "TO-BR40L",
+  "bolsa-rinon-40x50-impresa": "TO-BR50L",
 };
