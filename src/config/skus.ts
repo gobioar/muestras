@@ -18,10 +18,6 @@ export const SKUS: Record<string, string> = {
   "ban-tapa-105-pet": "09-0058",
   "ban-105-ovalada-750ml-22x14x4-fibra": "01-0002",
   "ban-tapa-ovalada-pet": "09-0023",
-  "ban-n1-12x9": "BFM-001",
-  "ban-n2-16x13": "BFM-002",
-  "ban-n3-18x14": "BFM-003",
-  "ban-n4-20x17": "BFM-005",
 
   // Bowls
   "bow-1000-blanco": "LZ-GO-75W(W)",
@@ -38,8 +34,6 @@ export const SKUS: Record<string, string> = {
   "bow-tapa-1000-fibra": "09-0025",
   "bow-500-fibra": "01-0013",
   "bow-tapa-500-fibra": "09-0024",
-  "bow-cono-grande-16x9x4-papas": "0149-01-01",
-  "bow-cono-chico-14x9x4-papas": "0544-01-02",
 
   // Cubiertos
   "cub-cuchillo-madera-16cm": "WD-101K",

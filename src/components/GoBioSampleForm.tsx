@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,15 @@ type CatalogItem = {
   id: string;
   name: string;
   category: Category;
+  // Subtítulo para separar tipos dentro de una misma categoría
+  group?: string;
+};
+
+type BagPrint = "sin" | "con";
+
+const BAG_PRINT_LABELS: Record<BagPrint, string> = {
+  sin: "sin impresión",
+  con: "con impresión",
 };
 
 // Miniatura con fallback y prioridad opcional
@@ -118,20 +127,16 @@ const CATALOG: CatalogItem[] = [
   { id: "ban-tapa-850", name: "Tapa Bandeja 850", category: "Bandejas" },
   { id: "ban-102-300ml-14x11x3-fibra", name: "Bandeja 102 (300ml / 14x11x3cm)", category: "Bandejas" },
   { id: "ban-tapa-102-pet", name: "Tapa Bandeja 102", category: "Bandejas" },
-  { id: "ban-103-550ml-18x12x3-fibra", name: "Bandeja 103 (550ml / 18x12x3cm)", category: "Bandejas" },
-  { id: "ban-tapa-103-pet", name: "Tapa Bandeja 103", category: "Bandejas" },
-  { id: "ban-105-900ml-18x15x4-fibra", name: "Bandeja 105 (900ml / 18x15x4cm)", category: "Bandejas" },
-  { id: "ban-tapa-105-pet", name: "Tapa Bandeja 105", category: "Bandejas" },
+  { id: "ban-103-550ml-18x12x3-fibra", name: "Bandeja 103 Baja (550ml / 18x12x3cm)", category: "Bandejas" },
+  { id: "ban-tapa-103-pet", name: "Tapa Bandeja 103 Baja", category: "Bandejas" },
+  { id: "ban-105-900ml-18x15x4-fibra", name: "Bandeja 105 Baja (900ml / 18x15x4cm)", category: "Bandejas" },
+  { id: "ban-tapa-105-pet", name: "Tapa Bandeja 105 Baja", category: "Bandejas" },
   { id: "ban-105-ovalada-750ml-22x14x4-fibra", name: "Bandeja 105 Ovalada (750ml / 22x14x4cm)", category: "Bandejas" },
   { id: "ban-tapa-ovalada-pet", name: "Tapa Bandeja Ovalada", category: "Bandejas" },
   { id: "ban-103-alta-650ml-16x12x5-fibra", name: "Bandeja 103 Alta (650ml / 16x12x5cm)", category: "Bandejas" },
   { id: "ban-tapa-103-alta-pet", name: "Tapa Bandeja 103 Alta", category: "Bandejas" },
   { id: "ban-105-alta-1100ml-23x15x4-fibra", name: "Bandeja 105 Alta (1100ml / 23x15x4cm)", category: "Bandejas" },
   { id: "ban-tapa-105-alta-pet", name: "Tapa Bandeja 105 Alta", category: "Bandejas" },
-  { id: "ban-n1-12x9", name: "Bandeja N1 12x9cm", category: "Bandejas" },
-  { id: "ban-n2-16x13", name: "Bandeja N2 16x13cm", category: "Bandejas" },
-  { id: "ban-n3-18x14", name: "Bandeja N3 18x14cm", category: "Bandejas" },
-  { id: "ban-n4-20x17", name: "Bandeja N4 20x17cm", category: "Bandejas" },
 
   // Bowls
   { id: "bow-1000-blanco", name: "Bowl 1000", category: "Bowls" },
@@ -150,8 +155,6 @@ const CATALOG: CatalogItem[] = [
   { id: "bow-tapa-500-fibra", name: "Tapa Bowl 500 Transparente", category: "Bowls" },
   { id: "bow-850-fibra", name: "Bowl 850 Natural", category: "Bowls" },
   { id: "bow-tapa-850-fibra", name: "Tapa Bowl 850 Transparente", category: "Bowls" },
-  { id: "bow-cono-grande-16x9x4-papas", name: "Cono Grande 16x9x4cm (Papas Fritas)", category: "Bowls" },
-  { id: "bow-cono-chico-14x9x4-papas", name: "Cono Chico 14x9x4cm (Papas Fritas)", category: "Bowls" },
 
   // Cubiertos
   { id: "cub-cuchillo-madera-16cm", name: "Cuchillo 16cm", category: "Cubiertos" },
@@ -187,15 +190,15 @@ const CATALOG: CatalogItem[] = [
   { id: "vaso-4oz", name: "Vaso 4oz (120ml)", category: "Vasos" },
 
   // Bolsas
-  { id: "bolsa-camiseta-20x30", name: "Bolsa Camiseta 20x30", category: "Bolsas" },
-  { id: "bolsa-camiseta-30x40", name: "Bolsa Camiseta 30x40", category: "Bolsas" },
-  { id: "bolsa-camiseta-40x50", name: "Bolsa Camiseta 40x50", category: "Bolsas" },
-  { id: "bolsa-arranque-20x20", name: "Bolsa de Arranque 20x20", category: "Bolsas" },
-  { id: "bolsa-arranque-20x30", name: "Bolsa de Arranque 20x30", category: "Bolsas" },
-  { id: "bolsa-arranque-30x40", name: "Bolsa de Arranque 30x40", category: "Bolsas" },
-  { id: "bolsa-rinon-20x30", name: "Bolsa Riñón 20x30", category: "Bolsas" },
-  { id: "bolsa-rinon-30x40", name: "Bolsa Riñón 30x40", category: "Bolsas" },
-  { id: "bolsa-rinon-40x50", name: "Bolsa Riñón 40x50", category: "Bolsas" },
+  { id: "bolsa-arranque-20x20", name: "Bolsa de Arranque 20x20", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-20x30", name: "Bolsa de Arranque 20x30", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-arranque-30x40", name: "Bolsa de Arranque 30x40", category: "Bolsas", group: "Bolsas de arranque" },
+  { id: "bolsa-camiseta-20x30", name: "Bolsa Camiseta 20x30", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-30x40", name: "Bolsa Camiseta 30x40", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-camiseta-40x50", name: "Bolsa Camiseta 40x50", category: "Bolsas", group: "Bolsas camiseta" },
+  { id: "bolsa-rinon-20x30", name: "Bolsa Riñón 20x30", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-30x40", name: "Bolsa Riñón 30x40", category: "Bolsas", group: "Bolsas riñón" },
+  { id: "bolsa-rinon-40x50", name: "Bolsa Riñón 40x50", category: "Bolsas", group: "Bolsas riñón" },
 ];
 
 // Mapas de Material por producto (tus claves actuales)
@@ -212,20 +215,16 @@ const MATERIALS: Record<string, string> = {
   "Tapa Bandeja 850": "Bagazo de Caña de Azúcar",
   "Bandeja 102 (300ml / 14x11x3cm)": "Fibra Natural",
   "Tapa Bandeja 102": "PET Cristal",
-  "Bandeja 103 (550ml / 18x12x3cm)": "Fibra Natural",
-  "Tapa Bandeja 103": "PET Cristal",
-  "Bandeja 105 (900ml / 18x15x4cm)": "Fibra Natural",
-  "Tapa Bandeja 105": "PET Cristal",
+  "Bandeja 103 Baja (550ml / 18x12x3cm)": "Fibra Natural",
+  "Tapa Bandeja 103 Baja": "PET Cristal",
+  "Bandeja 105 Baja (900ml / 18x15x4cm)": "Fibra Natural",
+  "Tapa Bandeja 105 Baja": "PET Cristal",
   "Bandeja 105 Ovalada (750ml / 22x14x4cm)": "Fibra Natural",
   "Tapa Bandeja Ovalada": "PET Cristal",
   "Bandeja 103 Alta (650ml / 16x12x5cm)": "Fibra Natural",
   "Tapa Bandeja 103 Alta": "PET Cristal",
   "Bandeja 105 Alta (1100ml / 23x15x4cm)": "Fibra Natural",
   "Tapa Bandeja 105 Alta": "PET Cristal",
-  "Bandeja N1 12x9cm": "Papel Kraft",
-  "Bandeja N2 16x13cm": "Papel Kraft",
-  "Bandeja N3 18x14cm": "Papel Kraft",
-  "Bandeja N4 20x17cm": "Papel Kraft",
   // Vasos
   "Vaso 8oz (240ml)": "Bagazo de Caña de Azúcar",
   "Tapa Vaso 8oz": "Bagazo de Caña de Azúcar",
@@ -251,8 +250,6 @@ const MATERIALS: Record<string, string> = {
   "Tapa Bowl 500 Transparente": "PET Cristal",
   "Bowl 850 Natural": "Fibra Natural",
   "Tapa Bowl 850 Transparente": "PET Cristal",
-  "Cono Grande 16x9x4cm (Papas Fritas)": "Papel Kraft",
-  "Cono Chico 14x9x4cm (Papas Fritas)": "Papel Kraft",
   // Cubiertos
   "Cuchillo 16cm": "Madera de Abedul",
   "Cuchara 16cm": "Madera de Abedul",
@@ -327,6 +324,7 @@ export default function GoBioSampleForm() {
   const [cart, setCart] = useState<
     Record<string, { id: string; name: string; category: Category; qty: number }>
   >({});
+  const [bagPrint, setBagPrint] = useState<BagPrint>("sin");
   const router = useRouter();
 
   // Persistir preferencia de categoría
@@ -438,7 +436,8 @@ export default function GoBioSampleForm() {
     const clientId = generateClientId();
     const cartPayload = Object.values(cart).map((it) => ({
       id: it.id,
-      name: it.name,
+      // En las bolsas el nombre incluye si se piden con o sin impresión
+      name: it.category === "Bolsas" ? `${it.name} (${BAG_PRINT_LABELS[bagPrint]})` : it.name,
       category: it.category,
       qty: it.qty,
       sku: SKUS[it.id] || "",
@@ -647,12 +646,48 @@ export default function GoBioSampleForm() {
 
             <div className="grid md:grid-cols-3 gap-6 items-start">
               <div className="md:col-span-2 grid sm:grid-cols-2 gap-3">
-                {CATALOG.filter((p) => p.category === selectedCategory).map((item, idx) => {
+                {selectedCategory === "Bolsas" && (
+                  <div className="sm:col-span-2 rounded-xl border border-[color:var(--gb-border-soft)] bg-[rgba(50,170,147,.06)] p-4">
+                    <p className="text-sm font-semibold text-[color:var(--gb-neutral-800)]" id="bag-print-label">
+                      ¿Querés las bolsas con o sin impresión?
+                    </p>
+                    <div role="radiogroup" aria-labelledby="bag-print-label" className="mt-3 flex flex-wrap gap-2">
+                      {(["sin", "con"] as const).map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          role="radio"
+                          aria-checked={bagPrint === opt}
+                          onClick={() => setBagPrint(opt)}
+                          className={`px-3 py-1.5 rounded-full text-sm transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--gb-primary)] focus-visible:ring-offset-2 ${
+                            bagPrint === opt
+                              ? "bg-[linear-gradient(135deg,#32AA93_0%,#7CBF81_100%)] text-white border-transparent shadow-sm"
+                              : "bg-white text-[color:var(--gb-neutral-800)] border-[color:var(--gb-neutral-100)] hover:bg-[rgba(50,170,147,.08)]"
+                          }`}
+                        >
+                          {opt === "sin" ? "Sin impresión" : "Con impresión"}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-xs text-[color:var(--gb-neutral-600)]">
+                      {bagPrint === "con"
+                        ? "Contanos en Comentarios adicionales qué diseño o logo querés imprimir."
+                        : "Se aplica a todas las bolsas que elijas."}
+                    </p>
+                  </div>
+                )}
+                {CATALOG.filter((p) => p.category === selectedCategory).map((item, idx, list) => {
                   const qty = cart[item.id]?.qty || 0;
                   const isInitialAboveTheFold = selectedCategory === "Estuches" && idx < 6;
+                  const startsGroup = !!item.group && item.group !== list[idx - 1]?.group;
                   return (
+                    <Fragment key={item.id}>
+                    {startsGroup && (
+                      <h4 className="sm:col-span-2 mt-2 border-b border-[color:var(--gb-border-soft)] pb-1 text-base font-semibold text-[color:var(--gb-neutral-800)]">
+                        {item.group}
+                      </h4>
+                    )}
                     <div
-                      key={item.id}
                       className="flex items-center justify-between rounded-xl border border-[color:var(--gb-border-soft)] px-3 py-3.5 bg-white transition-all duration-200 ease-out hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-px"
                     >
                       <div className="flex items-center gap-3">
@@ -684,6 +719,7 @@ export default function GoBioSampleForm() {
                         </Button>
                       </div>
                     </div>
+                    </Fragment>
                   );
                 })}
               </div>
@@ -702,7 +738,9 @@ export default function GoBioSampleForm() {
                             <div className="flex items-center gap-3">
                               <ProductThumb id={it.id} alt={it.name} className="h-10 w-10" />
                               <div>
-                                <p className="text-sm font-medium text-[color:var(--gb-neutral-800)]">{it.name}</p>
+                                <p className="text-sm font-medium text-[color:var(--gb-neutral-800)]">
+                                  {it.category === "Bolsas" ? `${it.name} (${BAG_PRINT_LABELS[bagPrint]})` : it.name}
+                                </p>
                                 <p className="text-xs text-[color:var(--gb-neutral-600)]">{it.category}</p>
                               </div>
                             </div>
