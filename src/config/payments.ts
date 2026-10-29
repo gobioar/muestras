@@ -1,7 +1,7 @@
 // Config de pagos y contacto (placeholders editables)
 // Editá estos valores según tus datos reales.
 export const BANK_INFO = {
-  alias: "gobioecoenvases",
+  alias: "GOBIOGALICIA",
   cbu: "0070010820000025100279",
   titular: "GOBIO SA (Ex-Orange Op y Adm SA)",
   cuit: "30716543044",
